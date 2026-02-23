@@ -1,15 +1,19 @@
 `timescale 1ns / 1ps
 
 module osc_noise
+    #(
+        parameter int ACC_WIDTH = 32,
+        parameter int OUT_WIDTH = 24
+    )
     (
         input logic clk,
         input logic rst_n,
         input logic enable,
 
-        output logic [23:0] noise_out
+        output logic [OUT_WIDTH-1:0] noise_out
     );
 
-    logic [31:0] lfsr_reg;
+    logic [ACC_WIDTH-1:0] lfsr_reg;
 
     // A 32-bit LFSR needs a non-zero starting state (seed)
     // If it hits 0, it stays 0 forever.
@@ -28,7 +32,4 @@ module osc_noise
     end
 
     // Output the top bits. 
-    // Since the LFSR is pseudo-random, it's already "centered" over time.
-    assign noise_out = lfsr_reg[31:8];
-
- endmodule
+    // Since the LF

@@ -8,16 +8,20 @@
  */
 
 module osc_square
+    #(
+        parameter int ACC_WIDTH = 32,
+        parameter int OUT_WIDTH = 24
+    )
     (
         input logic clk,
         input logic rst_n,
-        input logic [31:0] tuning_word, 
+        input logic [ACC_WIDTH-1:0] tuning_word, 
         input logic enable,
 
-        output logic [23:0] sq_out
+        output logic [OUT_WIDTH-1:0] sq_out
     );
 
-    logic [31:0] phase_acc;
+    logic [ACC_WIDTH-1:0] phase_acc;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -31,7 +35,4 @@ module osc_square
     // Square Wave Generation
     // We check the MSB. If 0, output positive max; if 1, output negative max.
     // 24-bit Signed Max: 0x7FFFFF
-    // 24-bit Signed Min: 0x800000
-    assign sq_out = (phase_acc[31] == 1'b0) ? 24'h7FFFFF : 24'h800000;
-
- endmodule
+  
