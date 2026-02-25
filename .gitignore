@@ -1,0 +1,8 @@
+#Sync config exlcusion
+sftp.json
+
+#Visual Studio config exclusion
+.vscode/
+
+#Mac-OS File-index exclusion
+.DS_Store
