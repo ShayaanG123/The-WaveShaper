@@ -109,7 +109,7 @@ module tb_synth_osc_bank();
 
         // --- TEST 6: 50/50 Split (2 Oscillators summing to 1.0) ---
         // 0x80000000 + 0x7FFFFFFF = 0xFFFFFFFF
-        $display("[%0t] Test 7: Saw & Square Split (Sum = 100%%)", $time);
+        $display("[%0t] Test 6: Saw & Square Split (Sum = 100%%)", $time);
         saw_coef    = 32'h8000_0000;
         square_coef = 32'h7FFF_FFFF;
         sine_coef   = '0;
@@ -119,17 +119,17 @@ module tb_synth_osc_bank();
 
         // --- TEST 7: Perfect 5-Way Split (Summing to 1.0) ---
         // 0x33333333 * 5 = 0xFFFFFFFF
-        $display("[%0t] Test 8: 5-Way Even Split (Sum = 100%%)", $time);
-        saw_coef    = 32'h3333_3333;
-        square_coef = 32'h3333_3333;
-        sine_coef   = 32'h3333_3333;
-        tri_coef    = 32'h3333_3333;
-        noise_coef  = 32'h3333_3333;
+        $display("[%0t] Test 7: 4-Way Even Split (Sum = 100%%, No Noise)", $time);
+        saw_coef    = 32'h4000_0000; // 25% amplitude
+        square_coef = 32'h4000_0000; // 25% amplitude
+        sine_coef   = 32'h4000_0000; // 25% amplitude
+        tri_coef    = 32'h4000_0000; // 25% amplitude
+        noise_coef  = 32'h0000_0000; // Muted
         #10000;
 
         // --- TEST 8: The "Everything" Mix ---
         // Pushing all 5 oscillators at 50% volume to test the mixer's summing capability
-        $display("[%0t] Test 6: Full Polyphonic Mix (All Oscs at 50%%)", $time);
+        $display("[%0t] Test 8: Full Polyphonic Mix (All Oscs at 50%%)", $time);
         saw_coef    = 32'h7FFF_FFFF;
         square_coef = 32'h7FFF_FFFF;
         sine_coef   = 32'h7FFF_FFFF;

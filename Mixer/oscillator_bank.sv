@@ -78,7 +78,7 @@ module synth_osc_bank
     );
 
     // --- 6. The DSP Mixer ---
-    wave_adder #(
+    mixer #(
         .OUT_WIDTH(OUT_WIDTH), .COEF_WIDTH(COEF_WIDTH)
     ) u_mixer (
         .clk(clk), .rst_n(rst_n), .enable(enable),
