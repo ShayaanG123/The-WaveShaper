@@ -6,3 +6,5 @@ sftp.json
 
 #Mac-OS File-index exclusion
 .DS_Store
+
+Project_Extras/
