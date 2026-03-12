@@ -26,13 +26,20 @@ module osc_square
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             phase_acc <= 32'h0;
-        end else if (enable) begin
+        end 
+        else if (enable) begin
             phase_acc <= phase_acc + tuning_word;
         end
-        else phase_acc <= phase_acc;
+        else begin 
+            phase_acc <= phase_acc;
+        end
     end
 
-    // Square Wave Generation
-    // We check the MSB. If 0, output positive max; if 1, output negative max.
-    // 24-bit Signed Max: 0x7FFFFF
-  
+    
+    localparam [OUT_WIDTH-1:0] MAX_VAL = {OUT_WIDTH{1'b1}}; // 0xFFFFFF for 24-bit
+    localparam [OUT_WIDTH-1:0] MIN_VAL = {OUT_WIDTH{1'b0}}; // 0x000000 for 24-bit
+
+    // Check MSB (Indictor of first half of bits)
+    assign sq_out = (phase_acc[ACC_WIDTH-1] == 1'b0) ? MAX_VAL : MIN_VAL;
+
+ endmodule

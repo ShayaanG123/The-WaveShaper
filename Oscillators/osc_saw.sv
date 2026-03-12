@@ -32,4 +32,6 @@
         else phase_acc <= phase_acc;
     end
 
-    // C
+    assign saw_out = phase_acc[ACC_WIDTH-1 -: OUT_WIDTH];
+
+ endmodule
