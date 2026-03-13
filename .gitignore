@@ -1,10 +1,12 @@
-#Sync config exlcusion
+#Sync config or script exlcusion
 sftp.json
+*.sh
 
 #Visual Studio config exclusion
 .vscode/
 
+#LSP config exclusion
+veridian.yml
 #Mac-OS File-index exclusion
 .DS_Store
 
-Project_Extras/
