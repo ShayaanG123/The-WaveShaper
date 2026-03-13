@@ -25,9 +25,10 @@ module osc_sine
     // 1. Generate the Sine Table
     initial begin
         for (int i = 0; i < (2**ADDR_WIDTH); i = i + 1) begin
-            // Scale to OUT_WIDTH signed range
-            // Use (2**(OUT_WIDTH-1) - 1) for the peak amplitude
-            sine_lut[i] = $signed( (2.0**(OUT_WIDTH-1) - 1.0) * $sin(2.0 * PI * i / (2.0**ADDR_WIDTH)) );
+            real half_scale = (2.0**OUT_WIDTH - 1.0) / 2.0;
+            // 2.0 * PI * i / (2.0**ADDR_WIDTH))) converts i to radians 
+            // $unsigned converts value into integer
+            sine_lut[i] = $unsigned(half_scale + (half_scale * $sin(2.0 * PI * i / (2.0**ADDR_WIDTH))));
         end
     end
 
@@ -44,4 +45,8 @@ module osc_sine
     // Slice top ADDR_WIDTH bits: [MSB : MSB - (ADDR_WIDTH-1)]
     always_ff @(posedge clk) begin
         if (enable) begin
-            sine_out <= sine_lut[phase_acc[ACC_
+            sine_out <= sine_lut[phase_acc[ACC_WIDTH-1 -: ADDR_WIDTH]];
+        end
+    end
+
+ endmodule
