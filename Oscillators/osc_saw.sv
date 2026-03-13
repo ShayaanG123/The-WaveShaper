@@ -8,16 +8,20 @@
  */
 
  module osc_saw
+    #(
+        parameter int ACC_WIDTH = 32,
+        parameter int OUT_WIDTH = 24
+    )
     (
         input logic clk,
         input logic rst_n,
-        input logic [31:0] tuning_word, // Determines the frequency of output waveform normalized to clk
+        input logic [ACC_WIDTH-1:0] tuning_word, // Determines the frequency of output waveform normalized to clk
         input logic enable,
 
-        output logic [23:0] saw_out
+        output logic [OUT_WIDTH-1:0] saw_out
     );
 
-    logic [31:0] phase_acc;
+    logic [ACC_WIDTH-1:0] phase_acc;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -28,6 +32,6 @@
         else phase_acc <= phase_acc;
     end
 
-    // Centers the wave around. Converts to signed logic
-    assign saw_out = {~phase_acc[31], phase_acc[30:8]};
+    assign saw_out = phase_acc[ACC_WIDTH-1 -: OUT_WIDTH];
+
  endmodule
