@@ -16,23 +16,36 @@
 module ADSR_envelope_bank
     #(
         parameter VOICE_NUM = 4,
-        parameter BIT_DEPTH = 32,
+        parameter BIT_DEPTH = 24,
         parameter OPTION_DEPTH = 8 //num bits on user-facing controls
         )
     (
-        input logic [VOICE_NUM-1:0] trigger,
-        input logic [OPTION_DEPTH-1:0] attack_time,
-        input logic [OPTION_DEPTH-1:0] decay_time,
-        input logic [OPTION_DEPTH-1:0] sustain_level,
-        input logic [OPTION_DEPTH-1:0] release_time,
-        input logic clk
+        input logic [VOICE_NUM-1:0] gate,
+        input logic [VOICE_NUM-1:0][OPTION_DEPTH-1:0] attack_time,
+        input logic [VOICE_NUM-1:0][OPTION_DEPTH-1:0] decay_time,
+        input logic [VOICE_NUM-1:0][OPTION_DEPTH-1:0] sustain_level,
+        input logic [VOICE_NUM-1:0][OPTION_DEPTH-1:0] release_time,
+        input logic clk, rst_l,
+
+        output logic [VOICE_NUM-1:0][BIT_DEPTH-1:0] control_waves
         );
-                        
+
+        genvar i;
+        generate
+            for (i = 0; i < VOICE_NUM; i = i + 1) begin
+              ADSR_envelope_onevoice adsr(.clk(clk), .rst_l(rst_l), 
+                    .gate(gate[i]), .attack_time(attack_time[i]),
+                    .decay_time(decay_time[i]), 
+                    .sustain_level(sustain_level[i]),
+                    .release_time(release_time[i]),
+                    .control_wave(control_waves[i]) );
+            end
+        endgenerate
 endmodule
 
 module ADSR_envelope_onevoice
     #(
-        parameter BIT_DEPTH = 32,
+        parameter BIT_DEPTH = 24,
         parameter  OPTION_DEPTH = 8
       )
      (
@@ -71,9 +84,9 @@ module ADSR_envelope_onevoice
             last_gate <= gate;
         end
        
-        logic [OPTION_DEPTH-1:0] envelope_accumulator;
-        logic [OPTION_DEPTH-1:0] envelope_level;
-        logic [OPTION_DEPTH-1:0] last_level;
+        logic [OPTION_DEPTH-1:0] envelope_accumulator;//divide clk, to come
+        logic [BIT_DEPTH-1:0] envelope_level;
+        logic [BIT_DEPTH-1:0] last_level;
 
         /// *** --- ATTACK, DECAY & RELEASE ---
         //Attack is ~ a slope. X - time, Y - normalized volume from [0,1]
@@ -83,13 +96,13 @@ module ADSR_envelope_onevoice
         //Decay is the same but with negative slope from 1 to sust. level
         //Release is a negative slope from sustained level to 0
         //triggered upon a key-release*** ///
-        logic [OPTION_DEPTH-1:0] attack_incr, decay_incr, release_incr; 
+        logic [BIT_DEPTH-1:0] attack_incr, decay_incr, release_incr; 
         //attack time is inversely proportional to increment
-        logic [OPTION_DEPTH-1:0] ones;
+        logic [BIT_DEPTH-1:0] ones;
         assign ones = '1;//all ones
-        assign attack_incr = ones - attack_time;
-        assign decay_incr = ones - decay_time;
-        assign release_incr = ones - release_time;
+        assign attack_incr = ones - {16'b0, attack_time};
+        assign decay_incr = ones - {16'b0, decay_time};
+        assign release_incr = ones - {16'b0, release_time};
 
         //track which envelope phase we're in
         logic attack_done, decay_done, release_done; 
@@ -99,7 +112,7 @@ module ADSR_envelope_onevoice
                 attack_done <= 0;
                 decay_done <= 0;
             end
-            if (triggered) begin//key press: A -> D -> latch at sustained level
+            else if (gate) begin//key press: A -> D -> latch at sustained level
                 //ATTACK
                 if (!attack_done) begin
                     //basic increment
@@ -113,20 +126,20 @@ module ADSR_envelope_onevoice
 
                 //DECAY
                 else if (attack_done && !decay_done) begin
-                    envelope_level <= envelope_level - decay_time;
+                    envelope_level <= envelope_level - decay_incr;
                     //guard to move-to sustain
-                    if (sustain_level > envelope_level) begin
-                        envelope_level <= sustain_level;
+                    if ({sustain_level, 16'b0} > envelope_level) begin
+                        envelope_level <= {sustain_level, 16'b0};
                         decay_done <= 1;
                     end
                 end
                 //SUSTAIN
                 else if (attack_done && decay_done) begin
-                    envelope_level <= sustain_level;
+                    envelope_level <= {sustain_level, 16'b0};
                 end
             end 
 
-            else if (detriggered) begin //on key-off: start release
+            else if (!gate) begin //on key-off: start release
                 //reset others and begin release immediately;
                 attack_done <= 0;
                 decay_done <= 0;
