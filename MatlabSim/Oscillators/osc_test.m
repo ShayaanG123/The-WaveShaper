@@ -19,6 +19,7 @@ M = round((f_target * 2^ACC_WIDTH) / fs);
 % Set Y-Axis Limits for 24-bit Unsigned
 y_lims = [-1e6, 2^OUT_WIDTH + 1e6];
 
+% Note that the oscillators look smooth because MATLAB connects the points
 figure('Name', 'Oscillator Library Verification');
 
 % --- 1. Square Wave ---
