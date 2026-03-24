@@ -9,9 +9,9 @@ f_target = 440; % A4
 ACC_WIDTH = 32;
 OUT_WIDTH = 24;
 ADDR_WIDTH = 10;
-total_samples = 1000;
+total_samples = 10000;
 on_step = 50;
-off_step = 500;
+off_step = 8000;
 
 % Calculate tuning word (M)
 M = round((f_target * 2^ACC_WIDTH) / fs);
@@ -28,6 +28,10 @@ out_sq = model_square(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH)
 plot(out_sq);
 ylim(y_lims);
 title('Square Wave'); grid on;
+
+max_val = 2^(OUT_WIDTH - 1) - 1;
+out_sq_float = double(out_sq) / max_val;
+sound(out_sq_float, fs);
 
 % --- 2. Sawtooth Wave ---
 subplot(5,1,2);

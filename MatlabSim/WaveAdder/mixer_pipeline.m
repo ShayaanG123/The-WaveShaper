@@ -13,7 +13,7 @@ ADDR_WIDTH  = 10;       % Sine LUT Address Width (2^10 entries)
 
 % 2. Mix Coefficients (Summing to 1.0)
 % Order: [Square, Triangle, Sawtooth, Sine, Noise]
-mix_coeffs = [0.0, 0.0, 0.0, 0.95, 0.05]; 
+mix_coeffs = [0.5, 0.0, 0.0, 0.5, 0.0]; 
 
 % 3. Run the Synth Core
 % Calls the wrapper function that generates and mixes the waves

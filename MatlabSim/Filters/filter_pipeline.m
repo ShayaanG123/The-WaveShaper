@@ -4,43 +4,40 @@ clear; clc; close all;
 % --- 1. Parameters ---
 fs = 48000;
 duration = 1.5;
+total_len = round(fs * duration); % Convert seconds to samples
 f_target = 110; % Low A (lots of harmonics for the filter)
-widths = [32, 24, 10, 24]; % [ACC, OUT, ADDR, ENV]
 
-mix_coeffs = [1.0, 0.0, 0.0, 0.0, 0.0]; 
+% Updated widths for mixer: [ACC, OUT, ADDR]
+% Note: The previous 4th element (ENV) is no longer used in mixer_out
+widths = [32, 24, 10]; 
 
-% ADSR
-adsr.A = 0.0; adsr.D = 0.0; adsr.S = 0.7; adsr.R = 0.0;
-adsr.gate_time = 0.8; adsr.start_delay = 0.1;
+% Mix coefficients: [sq, tri, saw, sin, noi]
+% Using a Sawtooth (1.0) is better for filter testing than a Square (1.0) 
+% because it has every harmonic, making the filter's effect more obvious.
+mix_coeffs = [0.0, 0.0, 1.0, 0.0, 0.0]; 
 
-% --- 2. Filter Coefficients (Standard LPF at 1kHz, Q=0.707) ---
-% In SystemVerilog, these will be sent via SPI/AXI
-fc = 12000; 
+% --- 2. Filter Coefficients (Standard Bandpass) ---
 f_low  = 1000; 
 f_high = 5000;
-
-% Normalize both frequencies
 Wn = [f_low, f_high] / (fs/2);
-% If you want HPF or LPF change 'bandpass' to lowpass or highpass
-% Also change n from 1 to 2 and Wn = fc / (fs/2);
 
-[b, a] = butter(1, Wn, 'bandpass'); % Generate standard Butterworth coeffs
-a_coeffs = a(2:3); % MATLAB's 'a' includes a0=1, we only need [a1, a2]
-
-% Null Filter / Pass-through
-b_null = [1, 0, 0];
-a_null = [0, 0]; % Remember your function takes [a1, a2]
+[b, a] = butter(1, Wn, 'bandpass'); 
+% MATLAB's 'a' is [1, a1, a2]. Your hardware function expects [a1, a2].
+a_coeffs = a(2:3); 
 
 % --- 2a. Visualize Response ---
+% Ensure your frequency_response function is compatible with this coeff format
 frequency_response(b, a_coeffs, fs);
 
 % --- 3. Run Full Pipeline ---
-final_signal = filter_out(fs, duration, f_target, widths, adsr, mix_coeffs, b, a_coeffs);
+% Calling the updated filter_out which now uses mixer_out internally
+final_signal = filter_out(fs, total_len, f_target, widths, mix_coeffs, b, a_coeffs);
 
 % --- 4. Visualization ---
 figure('Color', 'k', 'Name', 'Filtered Synth Output');
 t = (0:length(final_signal)-1) / fs;
 
 % Use your plot_waveform function
-plot_waveform(t, final_signal, widths(2), 'Final Filtered Output (24-bit LPF)');
+% widths(2) is OUT_WIDTH (24-bit)
+plot_waveform(t, final_signal, widths(2), 'Final Filtered Output (24-bit BP)');
 xlabel('Time (seconds)', 'Color', 'w');
