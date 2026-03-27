@@ -28,11 +28,8 @@ module osc_noise
             end else begin
                 lfsr_reg <= (lfsr_reg >> 1);
             end
+
+            noise_out <= lfsr_reg[ACC_WIDTH-1 -: OUT_WIDTH];
         end
-    end
-
-    // Output the top bits. 
-    // Since the LFSR is pseudo-random, it's already "centered" over time.
-    assign noise_out = lfsr_reg[ACC_WIDTH-1 -: OUT_WIDTH];
-
+    end 
  endmodule

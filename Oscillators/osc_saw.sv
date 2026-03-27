@@ -28,10 +28,9 @@
             phase_acc <= 32'h0;
         end else if (enable) begin
             phase_acc <= phase_acc + tuning_word;
+            saw_out <= phase_acc[ACC_WIDTH-1 -: OUT_WIDTH];
         end
         else phase_acc <= phase_acc;
-    end
-
-    assign saw_out = phase_acc[ACC_WIDTH-1 -: OUT_WIDTH];
+    end 
 
  endmodule

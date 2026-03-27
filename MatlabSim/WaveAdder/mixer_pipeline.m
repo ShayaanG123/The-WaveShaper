@@ -9,7 +9,6 @@ freq_hz     = 440;      % Oscillator Frequency (A4)
 
 ACC_WIDTH   = 32;       % Phase Accumulator Bit Width
 OUT_WIDTH   = 24;       % Waveform Output Bit Width
-ADDR_WIDTH  = 10;       % Sine LUT Address Width (2^10 entries)
 
 % 2. Mix Coefficients (Summing to 1.0)
 % Order: [Square, Triangle, Sawtooth, Sine, Noise]
@@ -18,7 +17,7 @@ mix_coeffs = [0.5, 0.0, 0.0, 0.5, 0.0];
 % 3. Run the Synth Core
 % Calls the wrapper function that generates and mixes the waves
 synth_out = mixer_out(fs, total_len, freq_hz, ...
-                           ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH, ...
+                           ACC_WIDTH, OUT_WIDTH, ...
                            mix_coeffs);
 
 % 4. Visualization (Using custom plot_waveform function)

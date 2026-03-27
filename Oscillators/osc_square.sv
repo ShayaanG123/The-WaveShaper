@@ -23,23 +23,20 @@ module osc_square
 
     logic [ACC_WIDTH-1:0] phase_acc;
 
+    localparam [OUT_WIDTH-1:0] MAX_VAL = {OUT_WIDTH{1'b1}}; // 0xFFFFFF for 24-bit
+    localparam [OUT_WIDTH-1:0] MIN_VAL = {OUT_WIDTH{1'b0}}; // 0x000000 for 24-bit
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             phase_acc <= 32'h0;
         end 
         else if (enable) begin
             phase_acc <= phase_acc + tuning_word;
+             sq_out <= (phase_acc[ACC_WIDTH-1] == 1'b0) ? MAX_VAL : MIN_VAL;
         end
         else begin 
             phase_acc <= phase_acc;
         end
     end
-
-    
-    localparam [OUT_WIDTH-1:0] MAX_VAL = {OUT_WIDTH{1'b1}}; // 0xFFFFFF for 24-bit
-    localparam [OUT_WIDTH-1:0] MIN_VAL = {OUT_WIDTH{1'b0}}; // 0x000000 for 24-bit
-
-    // Check MSB (Indictor of first half of bits)
-    assign sq_out = (phase_acc[ACC_WIDTH-1] == 1'b0) ? MAX_VAL : MIN_VAL;
 
  endmodule

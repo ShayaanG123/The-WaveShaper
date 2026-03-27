@@ -8,9 +8,8 @@ fs = 48000;
 f_target = 440; % A4
 ACC_WIDTH = 32;
 OUT_WIDTH = 24;
-ADDR_WIDTH = 10;
 total_samples = 10000;
-on_step = 10;
+on_step = 1;
 off_step = total_samples;
 
 % Calculate tuning word (M)
@@ -23,7 +22,7 @@ y_lims = [-1e6, 2^OUT_WIDTH + 1e6];
 out_sq  = model_square(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH);
 out_saw = model_saw(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH);
 out_tri = model_triangle(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH);
-out_sin = model_sine(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH);
+out_sin = model_sine(total_samples, on_step, off_step, M, ACC_WIDTH, OUT_WIDTH);
 out_noi = model_noise(total_samples, on_step, off_step, ACC_WIDTH, OUT_WIDTH);
 
 % ==========================================

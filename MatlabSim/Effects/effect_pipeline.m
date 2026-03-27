@@ -4,7 +4,7 @@ clear; clc; close all;
 % --- 1. Global Hardware Parameters ---
 fs          = 48000;
 duration    = 3.0; 
-f_target    = 220; % A3
+f_target    = 110; % A3
 widths      = [32, 24, 10, 24]; % [ACC, OUT, ADDR, ENV]
 
 % Mix: 50% Square, 50% Triangle for a hollow, vintage synth lead
@@ -44,7 +44,7 @@ fx_chorus = @(w) apply_chorus(w, fs, 30.0, 0.8, 0.5, 0.6);
 
 % 3. Echo/Delay (Feedback Delay Line)
 % Parameters: (signal, fs, delay_ms, feedback, mix)
-fx_delay  = @(w) apply_delay(w, fs, 400.0, 0.4, 0.5);
+fx_delay  = @(w) apply_delay(w, fs, 600.0, 0.4, 0.5);
 
 % 4. Reverb (Algorithmic / Schroeder)
 % Parameters: (signal, fs, decay_time, mix)
@@ -55,7 +55,7 @@ fx_reverb = @(w) apply_reverb(w, fs, 0.7, 0.4);
 fx_redux  = @(w) apply_redux(w, 8, 4, widths(2), 0.5);
 
 % --- Selection ---
-effect_chain = {fx_chorus, fx_reverb};
+effect_chain = {fx_delay, fx_delay, fx_delay, fx_delay};
 
 % --- 4. Execute the Pipeline ---
 disp('--- STARTING SYNTH PIPELINE ---');

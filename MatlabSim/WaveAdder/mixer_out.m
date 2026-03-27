@@ -1,4 +1,4 @@
-function synth_out = mixer_out(fs, total_len, freq_hz, ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH, mix_coeffs)
+function synth_out = mixer_out(fs, total_len, freq_hz, ACC_WIDTH, OUT_WIDTH, mix_coeffs)
     % RUN_SYNTH_CORE Generates and mixes waveforms based on hardware params
     % fs:         Sampling frequency (e.g., 48000)
     % total_len:  Number of samples to generate
@@ -17,7 +17,7 @@ function synth_out = mixer_out(fs, total_len, freq_hz, ACC_WIDTH, OUT_WIDTH, ADD
     w_sq  = model_square(total_len, 1, total_len, M, ACC_WIDTH, OUT_WIDTH);
     w_tri = model_triangle(total_len, 1, total_len, M, ACC_WIDTH, OUT_WIDTH);
     w_saw = model_saw(total_len, 1, total_len, M, ACC_WIDTH, OUT_WIDTH);
-    w_sin = model_sine(total_len, 1, total_len, M, ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH);
+    w_sin = model_sine(total_len, 1, total_len, M, ACC_WIDTH, OUT_WIDTH);
     w_noi = model_noise(total_len, 1, total_len, ACC_WIDTH, OUT_WIDTH);
     
     % 3. Extract Mix Coefficients
