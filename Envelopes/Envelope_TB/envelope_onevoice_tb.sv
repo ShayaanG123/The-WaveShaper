@@ -1,11 +1,13 @@
-`timescale 1ns / 1ps
+`default_nettype none
+timeunit 1ns; 
+timeprecision 100ps;
 
 module tb_ADSR();
 
     // Testbench signals
     logic        clk;
     logic        rst_n;
-    logic [31:0] attack_time, decay_time, sustain_level, release_time;
+    logic [7:0] attack_time, decay_time, sustain_level, release_time;
     logic        gate;
     logic [23:0] control_wave;
 
@@ -17,8 +19,8 @@ module tb_ADSR();
         .decay_time(decay_time),
         .sustain_level(sustain_level),
         .release_time(release_time),
-        .gate(enable),
-        .saw_out(saw_out)
+        .gate(gate),
+        .control_wave(control_wave)
     );
 
     // Clock generation: 100MHz (10ns period)
@@ -39,13 +41,20 @@ module tb_ADSR();
         gate = 0;
         
         attack_time = 8'h0f; 
-        sustain_level = 8'h0f; 
+        sustain_level = 8'h7f; 
         decay_time = 8'h0f; 
         release_time = 8'h0f; 
 
         // 2. Observe the EG
-        #5000;
-
+        #6;
+        rst_n = 1;
+        #53;
+        gate = 1;
+        #64000002; 
+        gate = 0;
+        #3000000;
+        gate = 1;
+        #32000000;
         $display("Simulation Finished");
         $finish;
     end

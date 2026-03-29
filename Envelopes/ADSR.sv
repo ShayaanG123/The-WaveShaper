@@ -1,5 +1,6 @@
 `default_nettype none
-
+timeunit 1ns;
+timeprecision 100ps;
 ///*** --ADSR Envelope--
 //A once-per-trigger filter that dictates how volume should attenuate over time
 //  -Can modulate any param, but really volume by convention, and to start for
@@ -32,7 +33,7 @@ module ADSR_envelope_bank
 
         genvar i;
         generate
-            for (i = 0; i < VOICE_NUM; i = i + 1) begin
+            for (i = 0; i < VOICE_NUM; i = i + 1) begin : ADSRs
               ADSR_envelope_onevoice adsr(.clk(clk), .rst_l(rst_l), 
                     .gate(gate[i]), .attack_time(attack_time[i]),
                     .decay_time(decay_time[i]), 
@@ -41,6 +42,11 @@ module ADSR_envelope_bank
                     .control_wave(control_waves[i]) );
             end
         endgenerate
+        //*** TODO: Key-press arbitration logic:
+        //          Suppose we're traversing a release in one of the EGs
+        //          How do we evict oldest note-press
+        //          upon the pressing of a fifth note? ***//
+
 endmodule
 
 module ADSR_envelope_onevoice
@@ -49,18 +55,20 @@ module ADSR_envelope_onevoice
         parameter  OPTION_DEPTH = 8
       )
      (
+        input logic clk, rst_l,
         input logic [OPTION_DEPTH-1:0] attack_time,
         input logic [OPTION_DEPTH-1:0] decay_time,
         input logic [OPTION_DEPTH-1:0] sustain_level,
         input logic [OPTION_DEPTH-1:0] release_time,
         input logic gate, //key-press for us
 
-        input logic clk, rst_l,
 
         output logic [BIT_DEPTH-1:0] control_wave
         );
 
-        logic triggered, detriggered, last_gate; //track key-on/off
+        logic triggered, detriggered, last_gate, retrig_window;
+        logic [23:0] attack_guard_check;
+        logic [23:0] release_guard_check;
 
         always_ff @(posedge clk or negedge rst_l) begin
             //update trigger/detrigger for moving thru A/D, and switching to R 
@@ -100,17 +108,32 @@ module ADSR_envelope_onevoice
         //attack time is inversely proportional to increment
         logic [BIT_DEPTH-1:0] ones;
         assign ones = '1;//all ones
-        assign attack_incr = ones - {16'b0, attack_time};
-        assign decay_incr = ones - {16'b0, decay_time};
-        assign release_incr = ones - {16'b0, release_time};
+        assign attack_incr =  {16'b0, attack_time};
+        assign decay_incr = {16'b0, decay_time};
+        assign release_incr = {16'b0, release_time};
 
         //track which envelope phase we're in
         logic attack_done, decay_done, release_done; 
 
+        assign attack_guard_check = envelope_level + attack_incr; 
+        assign release_guard_check = envelope_level - release_incr; 
+
         always_ff @(posedge clk or negedge rst_l) begin
             if (!rst_l) begin
+                retrig_window <= 0;
                 attack_done <= 0;
+                last_level <= 0;
                 decay_done <= 0;
+                envelope_level <= 0; 
+                release_done <= 0;
+            end
+            else if (retrig_window & gate) begin //reset on retrig and 
+                retrig_window <= 0;
+                envelope_level <= 0;
+                release_done <= 0;
+                decay_done <= 0;
+                attack_done <= 0;
+                last_level <= 0;
             end
             else if (gate) begin//key press: A -> D -> latch at sustained level
                 //ATTACK
@@ -118,7 +141,8 @@ module ADSR_envelope_onevoice
                     //basic increment
                     envelope_level <= envelope_level + attack_incr;
                     //if this causes overflow, move onto decay
-                    if (last_level > envelope_level) begin
+
+                    if (envelope_level > attack_guard_check) begin
                         attack_done <= 1;
                         envelope_level <= '1;
                     end
@@ -138,13 +162,14 @@ module ADSR_envelope_onevoice
                     envelope_level <= {sustain_level, 16'b0};
                 end
             end 
-
-            else if (!gate) begin //on key-off: start release
+            //on key-off: start release
+            else if (!gate && !release_done) begin 
+                retrig_window <= 1;
                 //reset others and begin release immediately;
-                attack_done <= 0;
-                decay_done <= 0;
+                // attack_done <= 0;
+                // decay_done <= 0;
                 envelope_level <= envelope_level - release_incr;
-                if (envelope_level > last_level) begin
+                if (envelope_level < release_guard_check) begin
                     envelope_level <= 0;
                     release_done <= 1;
                 end

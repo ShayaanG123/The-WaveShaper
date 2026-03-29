@@ -1,0 +1,9 @@
+{"vcs1":{"timestamp_begin":1774807657.777370211, "rt":0.66, "ut":0.26, "st":0.28}}
+{"vcselab":{"timestamp_begin":1774807658.613241449, "rt":0.87, "ut":0.55, "st":0.26}}
+{"link":{"timestamp_begin":1774807659.619521830, "rt":0.65, "ut":0.24, "st":0.37}}
+{"SNPS_VCS_INTERNAL_ROOT_START_TIME": 1774807656.956264309}
+{"VCS_COMP_START_TIME": 1774807656.956264309}
+{"VCS_COMP_END_TIME": 1774807662.298329958}
+{"VCS_USER_OPTIONS": "-sverilog ADSR.sv Envelope_TB/envelope_onevoice_adjust_in_flight.sv -debug_access+all -l compile.log"}
+{"vcs1": {"peak_mem": 1812780}}
+{"stitch_vcselab": {"peak_mem": 1812834}}

@@ -1,0 +1,32 @@
+{
+    "std": [
+        "std",
+        "reYIK",
+        "module",
+        1
+    ],
+    "ADSR_envelope_bank": [
+        "ADSR_envelope_bank",
+        "JIRy3",
+        "module",
+        2
+    ],
+    "ADSR_envelope_onevoice": [
+        "ADSR_envelope_onevoice",
+        "bBgDD",
+        "module",
+        3
+    ],
+    "tb_ADSR": [
+        "tb_ADSR",
+        "S0MHc",
+        "module",
+        4
+    ],
+    "...MASTER...": [
+        "SIM",
+        "amcQw",
+        "module",
+        5
+    ]
+}
