@@ -1,0 +1,54 @@
+`timescale 1ns / 1ps
+
+module osc_sine
+    #(
+        parameter int ACC_WIDTH = 32,
+        parameter int OUT_WIDTH = 24
+    )
+    (
+        input  logic                  clk,
+        input  logic                  rst_n,
+        input  logic [ACC_WIDTH-1:0]  tuning_word,
+        input  logic                  enable,
+
+        // 1. Declare as signed
+        output logic signed [OUT_WIDTH-1:0] sine_out
+    );
+
+    localparam int ADDR_WIDTH = 8; 
+    localparam real PI = 3.14159265358979323846;
+
+    logic [ACC_WIDTH-1:0] phase_acc;
+    
+    // 2. LUT must hold signed values
+    logic signed [OUT_WIDTH-1:0] sine_lut [0:(2**ADDR_WIDTH)-1];
+
+    initial begin
+        // Peak value for signed: (2^(N-1)) - 1
+        // Example for 24-bit: 8,388,607
+        automatic real max_amplitude = (2.0**(OUT_WIDTH-1)) - 1.0;
+        
+        for (int i = 0; i < (2**ADDR_WIDTH); i = i + 1) begin
+            // We no longer add half_scale. The sine function naturally 
+            // goes from -1.0 to 1.0, giving us our signed range.
+            sine_lut[i] = $rtoi(max_amplitude * $sin(2.0 * PI * i / (2.0**ADDR_WIDTH)));
+        end
+    end
+
+    // Phase Accumulator
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            phase_acc <= '0;
+        end else if (enable) begin
+            phase_acc <= phase_acc + tuning_word;
+        end
+    end
+
+    // LUT Read
+    always_ff @(posedge clk) begin
+        if (enable) begin
+            sine_out <= sine_lut[phase_acc[ACC_WIDTH-1 -: ADDR_WIDTH]];
+        end
+    end
+
+ endmodule

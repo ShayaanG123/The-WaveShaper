@@ -1,10 +1,21 @@
-#Sync config exlcusion
-sftp.json
+# Quartus
+Quartus_Projects/
 
-#Visual Studio config exclusion
-.vscode/
+# VCS / simulation outputs
+*/csrc/
+*/simv
+*/simv.daidir/
+*/DVEfiles/
+*.vpd
+*.vcd
+*.log
+*.key
 
-#Mac-OS File-index exclusion
+# Backup files
+*.bak
+
+# Mac
 .DS_Store
 
-Project_Extras/
+# VSCode
+.vscode/

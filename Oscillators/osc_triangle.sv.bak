@@ -1,0 +1,39 @@
+`timescale 1ns / 1ps
+
+module osc_triangle
+    #(
+        parameter int ACC_WIDTH = 32,
+        parameter int OUT_WIDTH = 24
+    )
+    (
+        input  logic                         clk,
+        input  logic                         rst_n,
+        input  logic [ACC_WIDTH-1:0]         tuning_word,
+        input  logic                         enable,
+
+        // Change to signed output
+        output logic signed [OUT_WIDTH-1:0]  tri_out
+    );
+
+    logic [ACC_WIDTH-1:0] phase_acc;
+    logic [OUT_WIDTH-1:0] raw_ramp; 
+
+    // Extract the ramp portion. We use OUT_WIDTH bits starting from the 2nd MSB.
+    // We flip the top bit of this slice to center it around zero (signed).
+    assign raw_ramp = {~phase_acc[ACC_WIDTH-2], phase_acc[ACC_WIDTH-3 -: OUT_WIDTH-1]};
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            phase_acc <= '0;
+            tri_out   <= '0;
+        end 
+        else if (enable) begin
+            phase_acc <= phase_acc + tuning_word;
+            
+            // If MSB is 0: Ramp Up (Normal signed ramp)
+            // If MSB is 1: Ramp Down (Invert the bits to reverse direction)
+            tri_out <= (phase_acc[ACC_WIDTH-1] == 1'b0) ? raw_ramp : ~raw_ramp;
+        end
+    end
+
+endmodule
