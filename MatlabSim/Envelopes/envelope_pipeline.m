@@ -1,4 +1,4 @@
-%% ENVELOPE_TEST: Hardware-Accurate ADSR Validation
+%% ENVELOPE_TEST: Hardware-Accurate ADSR Validation (with Filter)
 clear; clc; close all;
 
 % --- 1. System Parameters ---
@@ -10,7 +10,8 @@ f_target = 220;         % Frequency (A3)
 widths = [32, 24, 10, 24]; 
 
 % Mix: [Sq, Tri, Saw, Sin, Noi]
-mix_coeffs = [0.0, 0.0, 0.0, 1.0, 0.0]; 
+% Using Sawtooth (Index 3) to better hear the filter's effect
+mix_coeffs = [0.0, 0.0, 1.0, 0.0, 0.0]; 
 
 % --- 2. ADSR Configuration ---
 adsr.A = 0.15;          % 150ms Attack
@@ -20,24 +21,27 @@ adsr.R = 0.60;          % 600ms Release
 adsr.gate_time   = 1.2; % Note held for 1.2 seconds
 adsr.start_delay = 0.3; % Note starts after 300ms
 
-% --- 3. Run Pipeline ---
-% Calls your integrated hardware-accurate function
-final_signal = envelope_out(fs, duration, f_target, widths, adsr, mix_coeffs);
+% --- 3. Filter Configuration (New Section) ---
+% Define a Low Pass Filter at 2000Hz
+fc = 2000;
+[b, a] = butter(2, fc/(fs/2), 'low'); 
+a_coeffs = a(2:3); % Extract [a1, a2] for hardware model
 
-% --- 4. Visualization ---
-figure('Color', 'k', 'Name', 'Envelope Output Test');
+% --- 4. Run Pipeline ---
+% Updated call: now passes filter coefficients to envelope_out
+final_signal = envelope_out(fs, duration, f_target, widths, adsr, mix_coeffs, b, a_coeffs);
 
-% Generate time vector for plotting (Seconds)
+% --- 5. Visualization ---
+figure('Color', 'k', 'Name', 'Filtered & Enveloped Output Test');
 total_samples = length(final_signal);
 t = (0:total_samples-1) / fs;
 
-% Define styling
 OUT_WIDTH = widths(2);
-plot_title = sprintf('Final Enveloped Signal (%d-bit Hardware Model)', OUT_WIDTH);
+plot_title = sprintf('Final Filtered + Enveloped Signal (%d-bit Hardware Model)', OUT_WIDTH);
 
 % Call your specialized plotting function
 plot_waveform(t, final_signal, OUT_WIDTH, plot_title);
 
 % Final label adjustments
 xlabel('Time (seconds)', 'Color', 'w');
-ylabel('24-bit Unsigned Magnitude', 'Color', 'w');
+ylabel('Signed Magnitude (Centered)', 'Color', 'w');

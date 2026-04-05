@@ -1,10 +1,11 @@
-function out = model_sine(total_samples, start_step, stop_step, tuning_word, ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH)
+function out = model_sine(total_samples, start_step, stop_step, tuning_word, ACC_WIDTH, OUT_WIDTH)
     % Pre-allocate output
     out = zeros(1, total_samples, 'uint32');
     phase_acc = uint32(0);
     
     % 1. Create the Bit-True LUT
     % Standard FPGAs often use a 1024-entry (10-bit) LUT
+    ADDR_WIDTH = 10;
     lut_size = 2^ADDR_WIDTH;
     n_lut = 0:(lut_size-1);
     
