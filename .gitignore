@@ -1,5 +1,8 @@
 # Quartus
 Quartus_Projects/
+#Sync config or script exlcusion
+sftp.json
+*.sh
 
 # VCS / simulation outputs
 */csrc/
@@ -19,3 +22,8 @@ Quartus_Projects/
 
 # VSCode
 .vscode/
+#LSP config exclusion
+veridian.yml
+#Mac-OS File-index exclusion
+.DS_Store
+
