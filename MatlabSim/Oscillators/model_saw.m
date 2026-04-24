@@ -1,23 +1,44 @@
 function out = model_saw(total_samples, start_step, stop_step, tuning_word, ACC_WIDTH, OUT_WIDTH)
-    % Pre-allocate the output array as uint32 for exact bit-matching
-    out = zeros(1, total_samples, 'uint32');
+    % Pre-allocate as signed int32 to match 'logic signed [OUT_WIDTH-1:0]'
+    out = zeros(1, total_samples, 'int32');
     
-    % Initialize internal phase accumulator
+    % Initialize internal phase accumulator (32-bit unsigned)
     phase_acc = uint32(0); 
     
-    OUT_MASK = uint32(2^OUT_WIDTH - 1);
-
-    shift_val = -(ACC_WIDTH - OUT_WIDTH);
+    tuning_word = uint32(tuning_word);
+    
+    % Use uint64 for the mask to handle the addition before wrapping
+    ACC_MASK = uint64(2^ACC_WIDTH - 1);
+    
     for n = 1:total_samples
         if (n >= start_step) && (n <= stop_step)
-            % Slice the top bits (e.g., bits 31 down to 8)
-            out(n) = bitand(bitshift(phase_acc, shift_val), OUT_MASK);
             
-            % Update with wrap-around
-            next_phase = double(phase_acc) + double(tuning_word);
-            phase_acc = uint32(mod(next_phase, 2^ACC_WIDTH));
+            % --- 1. Bit-True Reconstruction ---
+            % SV: saw_out <= {~phase_acc[ACC_WIDTH-1], phase_acc[ACC_WIDTH-2 -: OUT_WIDTH-1]};
+            
+            % Extract and Flip MSB
+            msb = bitget(phase_acc, ACC_WIDTH);
+            flipped_msb = uint32(1 - msb); % 0->1, 1->0
+            
+            % Extract remaining bits [ACC_WIDTH-2 -: OUT_WIDTH-1]
+            % This aligns the bits based on the difference between widths
+            shift_val = ACC_WIDTH - OUT_WIDTH;
+            lower_bits_mask = uint32(2^(OUT_WIDTH - 1) - 1);
+            remaining_bits = bitand(bitshift(phase_acc, -shift_val), lower_bits_mask);
+            
+            % Reconstruct the bit vector by shifting the flipped MSB into position
+            combined = bitshift(flipped_msb, OUT_WIDTH - 1) + remaining_bits;
+            
+            % Use typecast to interpret the bit pattern as a signed integer
+            % This is the "magic" that prevents the +1 mismatch
+            out(n) = typecast(combined, 'int32');
+            
+            % --- 2. Sequential Phase Update ---
+            next_phase = uint64(phase_acc) + uint64(tuning_word);
+            phase_acc = uint32(bitand(next_phase, ACC_MASK));
         else
-            out(n) = uint32(0);
+            % Reset behavior
+            out(n) = int32(0); 
         end
     end
 end

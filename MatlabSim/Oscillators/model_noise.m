@@ -1,41 +1,51 @@
 function out = model_noise(total_samples, start_step, stop_step, ACC_WIDTH, OUT_WIDTH)
-    % Pre-allocate output array
-    out = zeros(1, total_samples, 'uint32');
+    % Pre-allocate as signed int32 to match your system's signed 2's complement audio
+    out = zeros(1, total_samples, 'int32');
     
-    % 1. Initial Seed
-    % This MUST be non-zero. Let's match your SV seed.
+    % 1. Initial Seed (Must match SV)
     lfsr_reg = uint32(hex2dec('ACE1')); 
     
     % XOR Mask for a 32-bit maximal period Galois LFSR
     % Polynomial Taps: 32, 22, 2, 1 
     poly_mask = uint32(hex2dec('80000007'));
     
-    % Mask for the 24-bit output
-    OUT_MASK = uint32(2^OUT_WIDTH - 1);
-
+    % Output register for latency simulation (SV's always_ff behavior)
+    noise_out_reg = int32(0);
+    
     for n = 1:total_samples
-        % The 'enable' logic
         if (n >= start_step) && (n <= stop_step)
             
-            % 2. Extract Output (Truncation)
-            % Slice the top OUT_WIDTH bits (e.g., bits 31 down to 8)
-            out(n) = bitand(bitshift(lfsr_reg, -(ACC_WIDTH - OUT_WIDTH)), OUT_MASK);
+            % --- 2. Extract and Map to Signed (Matches SV Slicing) ---
+            % SV: noise_out <= lfsr_reg[ACC_WIDTH-1 -: OUT_WIDTH];
+            shift_val = -(ACC_WIDTH - OUT_WIDTH);
+            raw_noise = bitshift(lfsr_reg, shift_val);
             
-            % 3. Galois LFSR Logic
-            % If the LSB is 1, shift right and XOR with the polynomial
+            % To keep this consistent with your other oscillators (Saw/Tri),
+            % we convert this unipolar noise (0 to Max) into bipolar noise (-Max to +Max)
+            % by flipping the MSB of the sliced output.
+            msb = bitget(raw_noise, OUT_WIDTH);
+            flipped_msb = ~msb & 1;
+            
+            lower_bits_mask = uint32(2^(OUT_WIDTH - 1) - 1);
+            lower_bits = bitand(raw_noise, lower_bits_mask);
+            
+            % Reconstruct as 2's complement
+            msb_weight = -int32(flipped_msb) * int32(2^(OUT_WIDTH - 1));
+            noise_out_reg = msb_weight + int32(lower_bits);
+            
+            % --- 3. Galois LFSR Logic (State Update) ---
             if bitget(lfsr_reg, 1) == 1
                 lfsr_reg = bitxor(bitshift(lfsr_reg, -1), poly_mask);
             else
-                % If LSB is 0, just shift right
                 lfsr_reg = bitshift(lfsr_reg, -1);
             end
             
         else
-            % Output is 0 when disabled
-            out(n) = uint32(0);
-            % Note: In hardware, the LFSR usually keeps its state when disabled
-            % so it doesn't repeat the same sequence every time you "press a key."
+            % Enable is low: SV logic keeps lfsr_reg state but we mute the output
+            noise_out_reg = int32(0);
         end
+        
+        % Assign to output array (simulating the registered hardware output)
+        out(n) = noise_out_reg;
     end
 end
-

@@ -1,6 +1,6 @@
 % Configuration
 ACC_WIDTH = 32;
-OUT_WIDTH = 24;
+OUT_WIDTH = 32;
 fs = 48000;
 f_target = 440;
 total_samples = 1024;

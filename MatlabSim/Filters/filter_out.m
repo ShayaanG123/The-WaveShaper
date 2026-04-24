@@ -1,31 +1,48 @@
-function filtered_out = filter_out(fs, total_len, f_target, widths, mix_coeffs, b_coeffs, a_coeffs)
-    % FILTER_OUT: Oscillator Mixer -> IIR Filter
-    % fs:         Sampling frequency
-    % total_len:  Duration in samples
-    % f_target:   Frequency in Hz
-    % widths:     [ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH]
-    % mix_coeffs: [sq, tri, saw, sin, noi]
-    % b_coeffs:   Feedforward coefficients [b0, b1, b2]
-    % a_coeffs:   Feedback coefficients [a1, a2]
+function filtered_out = filter_out(fs, total_len, f_target, widths, mix_coeffs, fc, Q, filter_type)
+    % FILTER_OUT: Oscillator Mixer -> Chamberlin SVF (Bit-True Hardware Model)
     
-    % 1. Run the Mixer Stage
-    % Extract widths for clarity
+    % 1. Extract Widths
     ACC_WIDTH  = widths(1);
     OUT_WIDTH  = widths(2);
-    ADDR_WIDTH = widths(3);
+    GAIN_SH    = 2; % Hardware-accurate shift to prevent mixer overflow
     
-    % This returns the raw mixed signal (Unsigned 0 to 2^OUT_WIDTH - 1)
-    mixed_signal = mixer_out(fs, total_len, f_target, ACC_WIDTH, OUT_WIDTH, ADDR_WIDTH, mix_coeffs);
+    % 2. Run the Hardware-Accurate Mixer Stage
+    % Calculate Tuning Word for DDS
+    tuning_word = uint32(round((f_target * 2^ACC_WIDTH) / fs));
     
-    % 2. Centering (Unsigned to Signed Conversion)
-    % Digital filters require a signal centered at 0 to function correctly.
-    COEFF_FRAC_WIDTH = 14; % Fixed-point precision for DSP coefficients
-    midpoint = 2^(OUT_WIDTH - 1);
-    signed_signal = int32(double(mixed_signal) - midpoint);
+    % Generate the 4 primary hardware waveforms
+    w_sq  = model_square(total_len, 1, total_len, tuning_word, ACC_WIDTH, OUT_WIDTH);
+    w_tri = model_triangle(total_len, 1, total_len, tuning_word, ACC_WIDTH, OUT_WIDTH);
+    w_saw = model_saw(total_len, 1, total_len, tuning_word, ACC_WIDTH, OUT_WIDTH);
+    w_noi = model_noise(total_len, 1, total_len, ACC_WIDTH, OUT_WIDTH);
+    w_zero = zeros(1, total_len, 'int32'); % Dummy 5th input
     
-    % 3. Apply the Second Order IIR (Biquad)
-    % Processes the raw oscillators before any ADSR envelope is applied
-    disp('Applying Second Order IIR Filter to Mixer Output...');
-    filtered_out = second_order_iir(signed_signal, b_coeffs, a_coeffs, ...
-                                       OUT_WIDTH, COEFF_FRAC_WIDTH, OUT_WIDTH);
+    % Call wave_mixer directly to include RTL startup artifacts and saturation
+    raw_mixed = wave_mixer(w_sq, w_tri, w_saw, w_noi, w_zero, ...
+                           mix_coeffs, OUT_WIDTH, GAIN_SH);
+    
+    % 3. Convert to Signed 2's Complement (Hardware Coherency)
+    % Since your model_square and wave_mixer already output signed int32, 
+    % we ensure the signal is in the correct format for the SVF logic.
+    signed_input = int32(raw_mixed);
+    
+    % 4. Call the Hardware-Bit-True Chamberlin SVF
+    fprintf('Applying Hardware-Coherent Chamber_SVF (%s)...\n', upper(filter_type));
+    
+    % This calls your specific [lp, bp, hp] function
+    [lp_out, bp_out, hp_out] = Chamber_SVF(signed_input, fc, Q, fs, OUT_WIDTH);
+    
+    % 5. Select the requested output node
+    switch lower(filter_type)
+        case 'hp'
+            filtered_out = hp_out;
+        case 'bp'
+            filtered_out = bp_out;
+        case 'lp'
+            filtered_out = lp_out;
+        case 'notch'
+            filtered_out = hp_out + lp_out;
+        otherwise
+            error('Invalid filter_type. Use ''lp'', ''bp'', ''hp'', or ''notch''.');
+    end
 end

@@ -1,44 +1,39 @@
 function out = model_triangle(total_samples, start_step, stop_step, tuning_word, ACC_WIDTH, OUT_WIDTH)
-    % Pre-allocate the output array as uint32
-    out = zeros(1, total_samples, 'uint32');
+    out = zeros(1, total_samples, 'int32');
+    phase_acc = uint64(0); 
     
-    % Initialize internal phase accumulator
-    phase_acc = uint32(0);
-    
-    % Mask to ensure we only keep the bits we want for the output (e.g., 0xFFFFFF)
-    OUT_MASK = uint32(2^OUT_WIDTH - 1);
-    
-    % Calculate the shift required to get the ramp bits.
-    % To get a full-scale triangle, we use the OUT_WIDTH bits below the MSB.
-    % For ACC_WIDTH=32 and OUT_WIDTH=24, this shift is 7.
-    shift_val = -(ACC_WIDTH - 1 - OUT_WIDTH);
+    ACC_MASK = bitshift(uint64(1), ACC_WIDTH) - 1;
+    TRI_MASK = bitshift(uint64(1), ACC_WIDTH - 1) - 1;
+    offset = bitshift(uint64(1), OUT_WIDTH - 1);
 
     for n = 1:total_samples
-        % The 'enable' window
         if (n >= start_step) && (n <= stop_step)
             
-            % 1. Extract the raw ramp bits [ACC_WIDTH-2 -: OUT_WIDTH]
-            % We shift right and mask to get the 24 bits below the MSB
-            ramp = bitand(bitshift(phase_acc, shift_val), OUT_MASK);
+            % --- 1. Update Phase FIRST (Mirrors RTL being one cycle ahead) ---
+            % This ensures the very first sample in the enable window 
+            % reflects the first addition of the tuning word.
+            phase_acc = bitand(phase_acc + uint64(tuning_word), ACC_MASK);
+
+            % --- 2. Calculate output based on NEW phase ---
+            msb = bitget(phase_acc, ACC_WIDTH);
+            lower_bits = bitand(phase_acc, TRI_MASK);
             
-            % 2. Folding Logic (Matches your 'always_comb' block)
-            % Check MSB (the 32nd bit)
-            if bitget(phase_acc, ACC_WIDTH) == 0
-                % First half of cycle: Rising slope (0 to Max)
-                out(n) = ramp;
+            if msb == 1
+                raw_tri = bitxor(lower_bits, TRI_MASK);
             else
-                % Second half of cycle: Falling slope (Max to 0)
-                % XOR with OUT_MASK is the bit-true version of ~ramp
-                out(n) = bitxor(ramp, OUT_MASK);
+                raw_tri = lower_bits;
             end
             
-            % 3. Update phase with manual wrap-around
-            next_phase = double(phase_acc) + double(tuning_word);
-            phase_acc = uint32(mod(next_phase, 2^ACC_WIDTH));
+            full_unsigned_tri = bitshift(raw_tri, 1);
+            trunc_shift = ACC_WIDTH - OUT_WIDTH;
+            truncated_tri = bitshift(full_unsigned_tri, -trunc_shift);
+            
+            out(n) = int32(double(truncated_tri) - double(offset));
             
         else
-            % Output is zero outside the start/stop window
-            out(n) = uint32(0);
+            % Optional: Clear phase_acc if out of window to mirror a synchronous reset
+            out(n) = int32(0);
+            phase_acc = uint64(0); 
         end
     end
 end

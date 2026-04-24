@@ -2,45 +2,58 @@
 
 module mixer
     #(
-        parameter int OUT_WIDTH = 24,
-        parameter int COEF_WIDTH = 32
+        parameter int OUT_WIDTH = 24, // Defaulted to 32 to match the rest of your system
+        parameter int COEF_WIDTH = 32,
+        parameter int GAIN_SH = 16 
     )
     (
         input  logic                  clk,
         input  logic                  rst_n,
         input  logic                  enable,
 
-        // Audio is now strictly unsigned (0 to 2^OUT_WIDTH - 1)
-        input  logic [OUT_WIDTH-1:0]  saw_out,
-        input  logic [OUT_WIDTH-1:0]  square_out,
-        input  logic [OUT_WIDTH-1:0]  sine_out,
-        input  logic [OUT_WIDTH-1:0]  tri_out,
-        input  logic [OUT_WIDTH-1:0]  noise_out,
+        // 1. Audio is SIGNED 2's complement
+        input  logic signed [OUT_WIDTH-1:0]  saw_out,
+        input  logic signed [OUT_WIDTH-1:0]  square_out,
+        input  logic signed [OUT_WIDTH-1:0]  sine_out,
+        input  logic signed [OUT_WIDTH-1:0]  tri_out,
+        input  logic signed [OUT_WIDTH-1:0]  noise_out,
 
-        // Coefficients are unsigned (0 to Max representing 0.0 to ~1.0)
-        input  logic [COEF_WIDTH-1:0] saw_coef,
-        input  logic [COEF_WIDTH-1:0] square_coef,
-        input  logic [COEF_WIDTH-1:0] sine_coef,
-        input  logic [COEF_WIDTH-1:0] tri_coef,
-        input  logic [COEF_WIDTH-1:0] noise_coef,
+        // 2. Coefficients are SIGNED Fixed-Point
+        input  logic signed [COEF_WIDTH-1:0] saw_coef,
+        input  logic signed [COEF_WIDTH-1:0] square_coef,
+        input  logic signed [COEF_WIDTH-1:0] sine_coef,
+        input  logic signed [COEF_WIDTH-1:0] tri_coef,
+        input  logic signed [COEF_WIDTH-1:0] noise_coef,
 
-        output logic [OUT_WIDTH-1:0]  wave_out,
-        output logic                  out_valid
+        output logic signed [OUT_WIDTH-1:0]  wave_out,
+        output logic                         out_valid
     );
 
-    // 1. Bit Growth Calculations
-    // Product width = Audio bits + Coef bits 
-    // (Removed the +1 because we no longer need the signed bit padding)
+    // --- Bit Growth Calculations ---
     localparam int PROD_WIDTH = OUT_WIDTH + COEF_WIDTH;
-    
-    // Sum width = Product width + 3 extra bits (to safely add 5 numbers without internal overflow)
     localparam int SUM_WIDTH = PROD_WIDTH + 3;
 
-    // Internal pipeline registers (now unsigned)
-    logic [PROD_WIDTH-1:0] saw_prod, square_prod, sine_prod, tri_prod, noise_prod;
-    logic [SUM_WIDTH-1:0]  mixer_sum;
+    // --- Hardware Saturation Limits (Truly Bulletproof) ---
+    // First, define a 1 that is explicitly the width of our adder tree
+    localparam logic signed [SUM_WIDTH-1:0] ONE = 1;
+    
+    // Now shift that wide '1'. No truncation, no unsigned zero-extension.
+    localparam logic signed [SUM_WIDTH-1:0] POS_MAX = (ONE << (OUT_WIDTH - 1)) - 1;
+    localparam logic signed [SUM_WIDTH-1:0] NEG_MAX = -(ONE << (OUT_WIDTH - 1));
 
-    // 2. Multiplier Stage
+    // Internal pipeline registers
+    logic signed [PROD_WIDTH-1:0] saw_prod, square_prod, sine_prod, tri_prod, noise_prod;
+    
+    // Combinational routing wires
+    logic signed [SUM_WIDTH-1:0]  mixer_sum;
+    logic signed [SUM_WIDTH-1:0]  shifted_sum;
+
+    // Valid signal pipeline register
+    logic enable_d1;
+
+    // ==========================================
+    // STAGE 1: Multiplier Stage
+    // ==========================================
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             saw_prod    <= '0;
@@ -49,7 +62,6 @@ module mixer
             tri_prod    <= '0;
             noise_prod  <= '0;
         end else if (enable) begin
-            // Pure unsigned multiplication. Simple and clean.
             saw_prod    <= saw_out    * saw_coef;
             square_prod <= square_out * square_coef;
             sine_prod   <= sine_out   * sine_coef;
@@ -58,22 +70,45 @@ module mixer
         end
     end
 
-    // 3. Adder Stage
+    // ==========================================
+    // STAGE 2: Adder Tree & Saturation Stage
+    // ==========================================
+    always_comb begin
+        // Sum all products
+        mixer_sum = saw_prod + square_prod + sine_prod + tri_prod + noise_prod; 
+        
+        // Arithmetic Right Shift
+        shifted_sum = mixer_sum >>> GAIN_SH;
+    end
+
+    // Clocked Output and Saturation Logic
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            mixer_sum <= '0;
             wave_out  <= '0;
-            out_valid <= 1'b0;
         end else if (enable) begin
-            mixer_sum <= saw_prod + square_prod + sine_prod + tri_prod + noise_prod; 
-            
-            // Scale the output back down to OUT_WIDTH.
-            // Get MSB of product which starts at COEF_WIDTH + OUT_WIDTH - 1
-            //Bits above were used to prevent overflow
-            wave_out  <= mixer_sum[COEF_WIDTH + OUT_WIDTH - 1 -: OUT_WIDTH];
-            
-            // Valid goes high to indicate data is ready
-            out_valid <= 1'b1; 
+            if (shifted_sum > POS_MAX) begin
+                wave_out <= POS_MAX[OUT_WIDTH-1:0];
+            end else if (shifted_sum < NEG_MAX) begin
+                wave_out <= NEG_MAX[OUT_WIDTH-1:0];
+            end else begin
+                wave_out <= shifted_sum[OUT_WIDTH-1:0];
+            end
+        end
+    end
+
+    // ==========================================
+    // STAGE 3: Valid Signal Pipeline
+    // ==========================================
+    // This runs continuously on clk to generate a 1-cycle pulse
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            enable_d1 <= 1'b0;
+            out_valid <= 1'b0;
+        end else begin
+            enable_d1 <= enable;
+            // Pulse out_valid exactly one clock cycle after the Stage 1 registers capture data
+            // (Which aligns perfectly with when Stage 2 logic settles and is clocked into wave_out)
+            out_valid <= enable_d1; 
         end
     end
 

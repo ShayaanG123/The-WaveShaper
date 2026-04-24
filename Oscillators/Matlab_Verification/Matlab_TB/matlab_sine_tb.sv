@@ -4,7 +4,7 @@ module tb_osc_sine;
 
     // Parameters matching the osc_square module
     localparam int ACC_WIDTH = 32;
-    localparam int OUT_WIDTH = 24;
+    localparam int OUT_WIDTH = 32;
 
     // Testbench Signals
     logic clk;

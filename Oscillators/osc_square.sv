@@ -14,8 +14,11 @@ module osc_square #(
     logic [ACC_WIDTH-1:0] phase_acc;
 
     // Headroom-aware peaks (25% volume) to prevent DAC "Muting/Spiking"
-    localparam logic signed [OUT_WIDTH-1:0] POS_PEAK = 32'h1FFFFFFF; 
-    localparam logic signed [OUT_WIDTH-1:0] NEG_PEAK = 32'hE0000000;
+    // localparam logic signed [OUT_WIDTH-1:0] POS_PEAK = 32'h1FFFFFFF; 
+    // localparam logic signed [OUT_WIDTH-1:0] NEG_PEAK = 32'hE0000000;
+
+    localparam logic signed [OUT_WIDTH-1:0] POS_PEAK = 24'h1fffff; 
+    localparam logic signed [OUT_WIDTH-1:0] NEG_PEAK = 24'he00000;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin

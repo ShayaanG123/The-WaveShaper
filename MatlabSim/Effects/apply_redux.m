@@ -1,49 +1,28 @@
-function out = apply_redux(waveform, target_bit_depth, downsample_factor, OUT_WIDTH, mix_wet)
-    % APPLY_REDUX Hardware-style Bitcrusher and Decimator
-    % waveform:          Input audio array (signed int32)
-    % target_bit_depth:  The new bit-depth (e.g., 8, 4, 1)
-    % downsample_factor: How many samples to hold (e.g., 1 = off, 6 = hold for 6 cycles)
-    % OUT_WIDTH:         Original bit width (e.g., 24)
-    % mix_wet:           Dry/Wet balance (0.0 to 1.0)
+function out = apply_redux(waveform, BIT_CRUSH, OUT_WIDTH)
+    % APPLY_REDUX Hardware-compliant Bitcrusher with 1-sample Latency
+    % waveform:  Input audio array (signed int32)
+    % BIT_CRUSH: Number of LSBs to zero out (Matches SV parameter)
+    % OUT_WIDTH: Bit-width of the audio path (e.g., 32)
     
     total_samples = length(waveform);
+    % Initialize with zeros to match the RTL reset state
     out = zeros(1, total_samples, 'int32');
     
-    % 1. Bit Reduction Calculation
-    % In hardware, we just shift the bits to the right to delete the LSBs, 
-    % and then shift them back to the left to maintain the overall amplitude.
-    shift_amount = OUT_WIDTH - target_bit_depth;
-    if shift_amount < 0
-        shift_amount = 0; % Prevent errors if target > OUT_WIDTH
-    end
+    % --- 1. Define the Mask ---
+    full_mask = uint64(2^OUT_WIDTH - 1);
+    crush_mask = uint32(bitand(bitshift(full_mask, BIT_CRUSH), full_mask));
     
-    % Variables for Sample and Hold
-    held_val = int32(0);
-    hold_counter = 0;
-    
-    for n = 1:total_samples
-        x_n = waveform(n);
+    % --- 2. Process with Latency ---
+    % Stop at total_samples - 1 to avoid indexing out of bounds on the output
+    for n = 1:(total_samples - 1)
+        % Convert to unsigned for bitwise operations
+        u_signal = typecast(int32(waveform(n)), 'uint32');
         
-        % --- DECIMATION (Sample Rate Reduction) ---
-        % Only grab a new sample if the counter has reset
-        if hold_counter == 0
-            held_val = x_n;
-        end
+        % Apply the hardware mask
+        u_crushed = bitand(u_signal, crush_mask);
         
-        % Increment counter and wrap around
-        hold_counter = hold_counter + 1;
-        if hold_counter >= downsample_factor
-            hold_counter = 0;
-        end
-        
-        % --- QUANTIZATION (Bit Depth Reduction) ---
-        % Right shift throws away the bottom bits, Left shift restores the scale.
-        % MATLAB's bitshift works directly on integers just like SystemVerilog '>>' and '<<'
-        crushed_val = bitshift(bitshift(held_val, -shift_amount), shift_amount);
-        
-        % --- MIX WET AND DRY ---
-        mixed_val = ((1.0 - mix_wet) * double(x_n)) + (mix_wet * double(crushed_val));
-        
-        out(n) = int32(mixed_val);
+        % Store in the NEXT sample slot (Latency = 1)
+        % Matches: signal_out <= signal_in & bit_crush_mask;
+        out(n + 1) = typecast(u_crushed, 'int32');
     end
 end

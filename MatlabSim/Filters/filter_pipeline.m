@@ -1,100 +1,134 @@
-%% FILTER_TEST: Full Synth Signal Chain Validation
+%% FILTER_TEST: Bit-True Hardware Pipeline (Square to Sine)
 clear; clc; close all;
 
-% --- 1. Parameters ---
+% --- 1. System Parameters ---
 fs = 48000;
 duration = 1.5;
-total_len = round(fs * duration); % Convert seconds to samples
-f_target = 110; % Low A (lots of harmonics for the filter)
+total_len = round(fs * duration); 
+f_target = 110; % Fundamental Frequency (A2)
 
-% Updated widths for mixer: [ACC, OUT, ADDR]
-widths = [32, 24, 10]; 
+% Widths: [ACC_WIDTH, OUT_WIDTH] 
+widths = [32, 24]; 
+OUT_WIDTH = widths(2);
 
-% Mix coefficients: [sq, tri, saw, sin, noi]
-% Using a Sawtooth (1.0) to provide a rich harmonic bed for the filter
-mix_coeffs = [0.0, 0.0, 1.0, 0.0, 0.0]; 
+% Mix coefficients: [sq, tri, saw, noi, dummy]
+% 1.0 on square wave to test harmonic stripping for the "Square to Sine" demo
+mix_coeffs = [1, 0.0, 0.0, 0.0, 0.0]; 
 
-% --- 2. Filter Coefficients (Standard Bandpass) ---
-% f_low  = 1000; 
-% f_high = 5000;
-% Wn = [f_low, f_high] / (fs/2);
-% [b, a] = butter(1, Wn, 'bandpass'); 
-% a_coeffs = a(2:3); % MATLAB's 'a' is [1, a1, a2]. Your hardware expects [a1, a2].
-
-fc = 2500;              % Cutoff frequency (Hz)
-Wn = fc / (fs/2);       % Normalized cutoff frequency
-[b, a] = butter(2, Wn, 'low'); 
-a_coeffs = a(2:3);
-
-% --- 2a. Visualize Response ---
-frequency_response(b, a_coeffs, fs);
+% --- 2. SVF Filter Parameters ---
+fc = 110; % Cutoff at Fundamental
+Q  = 4.0; % Resonant peak
+filter_type = 'bp';
 
 % --- 3. Run Full Pipeline ---
-% 1. Get the RAW signal directly from the mixer for our "Before" FFT
-raw_signal = mixer_out(fs, total_len, f_target, widths(1), widths(2), widths(3), mix_coeffs);
+% Now only calling filter_out, which internally calls wave_mixer and Chamber_SVF.
+% This ensures bit-true coherency and startup artifacts match RTL. [cite: 199]
+final_signal = filter_out(fs, total_len, f_target, widths, mix_coeffs, fc, Q, filter_type);
 
-% 2. Run the main filter function for our "After" signal
-final_signal = filter_out(fs, total_len, f_target, widths, mix_coeffs, b, a_coeffs);
+% --- 4. Calculate Hardware Clipping Bounds ---
+POS_MAX = int32(2^(OUT_WIDTH - 1) - 1);
+NEG_MAX = int32(-(2^(OUT_WIDTH - 1)));
 
-% --- 4. Time-Domain Visualization ---
-figure('Color', 'k', 'Name', 'Filtered Synth Output');
-t = (0:length(final_signal)-1) / fs;
-plot_waveform(t, final_signal, widths(2), 'Final Filtered Output (24-bit BP)');
-xlabel('Time (seconds)', 'Color', 'w');
+% Apply Saturation (Explicitly modeling the hardware output register)
+final_signal_clipped = max(min(final_signal, POS_MAX), NEG_MAX);
 
-% --- 5. Frequency-Domain Visualization (FFT Before & After) ---
-figure('Color', 'k', 'Name', 'Spectrum: Before vs After Filter');
-
-% Grab a chunk of the signal from the middle to avoid any startup transients
-% We use a power of 2 for a faster FFT (16384 samples is about 0.34 seconds)
-L = 16384; 
+% --- 5. Signal Preparation for Analysis ---
+L = min(16384, floor(total_len / 2));
 start_idx = round(total_len / 2);
 idx = start_idx : (start_idx + L - 1);
 
-% Extract segments and convert to double for math
-sig_raw  = double(raw_signal(idx));
-sig_filt = double(final_signal(idx));
+% Convert to double for plotting/FFT
+sig_filt     = double(final_signal(idx)) - mean(double(final_signal(idx)));
+sig_clipped  = double(final_signal_clipped(idx)) - mean(double(final_signal_clipped(idx)));
 
-% Remove DC offsets (crucial for the raw unsigned signal)
-sig_raw  = sig_raw - mean(sig_raw);
-sig_filt = sig_filt - mean(sig_filt);
+% --- 6. Generate SVF Impulse Response (Bit-True Hardware Version) ---
+impulse_len = 16384;
+impulse_hw = zeros(1, impulse_len, 'int32');
+impulse_hw(1) = int32(POS_MAX); 
 
-% Apply Hanning Window to clean up spectral leakage
-win = hann(L)';
-sig_raw  = sig_raw .* win;
-sig_filt = sig_filt .* win;
+[h_lp, h_bp, h_hp] = Chamber_SVF(impulse_hw, fc, Q, fs, OUT_WIDTH);
+switch lower(filter_type)
+    case 'hp', h_out = double(h_hp);
+    case 'bp', h_out = double(h_bp);
+    case 'lp', h_out = double(h_lp);
+end
 
-% Calculate FFTs
-Y_raw  = fft(sig_raw);
-Y_filt = fft(sig_filt);
+[H_svf, f_svf] = freqz(h_out, 1, impulse_len/2, fs);
+mag_svf = 20 * log10(abs(H_svf) + eps) - 20*log10(double(POS_MAX)); 
 
-% Normalize and convert to Single-Sided Magnitude (dB)
-P2_raw  = abs(Y_raw / L);
-P1_raw  = P2_raw(1:L/2+1);
-P1_raw(2:end-1) = 2 * P1_raw(2:end-1);
-dB_raw  = 20 * log10(P1_raw + 1e-6);
+% --- 7. Visualizations ---
+figure('Color', 'k', 'Name', 'Hardware Pipeline Verification', 'Position', [100, 100, 1000, 800]);
 
-P2_filt = abs(Y_filt / L);
-P1_filt = P2_filt(1:L/2+1);
-P1_filt(2:end-1) = 2 * P1_filt(2:end-1);
-dB_filt = 20 * log10(P1_filt + 1e-6);
-
-% Frequency vector for X-axis
-f_vec = fs * (0:(L/2)) / L;
-
-% Plot Overlay
-hold on;
-% Plot Raw Signal in a faded gray/blue so it sits in the background
-plot(f_vec, dB_raw, 'Color', [0.4 0.6 0.8 0.5], 'LineWidth', 1.5, 'DisplayName', 'Raw Sawtooth');
-% Plot Filtered Signal in a bright color on top
-plot(f_vec, dB_filt, 'Color', [1.0 0.6 0.2 0.9], 'LineWidth', 1.5, 'DisplayName', 'Bandpass Filtered');
-hold off;
-
+% Plot A: Time Domain
+subplot(3, 1, 1);
+t = (0:L-1) / fs;
+zoom_samples = min(round(0.05 * L), L); % Focus in on a few periods
+plot(t(1:zoom_samples), sig_clipped(1:zoom_samples), 'Color', [1.0 0.6 0.2], 'LineWidth', 2.0);
+title(sprintf('Time Domain: %d-bit Filtered Sine (fc = %d Hz, Q = %.1f)', OUT_WIDTH, fc, Q), 'Color', 'w');
+ylabel('Amplitude', 'Color', 'w');
+set(gca, 'Color', [0.1 0.1 0.1], 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.3 0.3 0.3]);
 grid on;
-set(gca, 'Color', [0.1 0.1 0.1], 'XColor', 'w', 'YColor', 'w');
-title('Fourier Analysis: Filter Effect on Harmonics', 'Color', 'w');
-xlabel('Frequency (Hz)', 'Color', 'w');
+
+% Plot B: FFT Analysis
+subplot(3, 1, 2);
+win = hann(L)';
+Y_filt = fft(sig_clipped .* win);
+P1_filt = abs(Y_filt(1:L/2+1) / L); P1_filt(2:end-1) = 2 * P1_filt(2:end-1);
+dB_filt = 20 * log10(P1_filt + 1e-6);
+f_vec = fs * (0:(L/2)) / L;
+plot(f_vec, dB_filt, 'Color', [1.0 0.6 0.2], 'LineWidth', 1.5);
+title('Frequency Domain: Harmonic Stripping Analysis', 'Color', 'w');
 ylabel('Magnitude (dB)', 'Color', 'w');
-xlim([0, 10000]); % Zoom in on the relevant harmonics
-ylim([-80, max(dB_raw)+10]); % Set floor to -80dB to ignore extreme background noise
-legend('TextColor', 'w', 'Color', 'k');
+xlim([0, 2000]); ylim([-120, max(dB_filt)+10]); 
+set(gca, 'Color', [0.1 0.1 0.1], 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.3 0.3 0.3]);
+grid on;
+
+% Plot C: Bode Plot (Bit-True)
+subplot(3, 1, 3);
+semilogx(f_svf, mag_svf, 'Color', [0.2 0.8 0.5], 'LineWidth', 2.0);
+title(['Chamberlin SVF ', upper(filter_type), ' Hardware Frequency Response'], 'Color', 'w');
+xlabel('Frequency (Hz)', 'Color', 'w'); ylabel('Magnitude (dB)', 'Color', 'w');
+xlim([20, 20000]); ylim([-60, 20]);
+xline(fc, '--w', 'Cutoff (fc)', 'LabelVerticalAlignment', 'bottom');
+set(gca, 'Color', [0.1 0.1 0.1], 'XColor', 'w', 'YColor', 'w', 'GridColor', [0.3 0.3 0.3]);
+grid on;
+
+fprintf('\n--- TEST SUMMARY ---\n');
+fprintf('Output Peak: %d\n', max(final_signal));
+fprintf('Success: Data generated for Slide T5.\n');
+
+% --- 8. Metric Verification (T5 Results) ---
+% Extract magnitude response in dB
+[H_svf, f_svf] = freqz(h_out, 1, impulse_len/2, fs);
+mag_svf = 20 * log10(abs(H_svf) + eps) - 20 * log10(double(POS_MAX)); 
+
+% Find the resonant peak (represents cutoff for LP/HP and center for BP)
+[max_mag, peak_idx] = max(mag_svf);
+achieved_freq = f_svf(peak_idx);
+
+% Calculate the Error Percentage against desired target
+error_pct = abs(achieved_freq - fc) / fc * 100;
+
+fprintf('\n--- T5 HARDWARE VERIFICATION SUMMARY ---\n');
+fprintf('Filter Mode:        %s\n', upper(filter_type));
+
+switch lower(filter_type)
+    case 'lp'
+        fprintf('Desired Cutoff:     %d Hz\n', fc);
+        fprintf('Achieved Cutoff:    %.2f Hz\n', achieved_freq);
+    case 'hp'
+        fprintf('Desired Cutoff:     %d Hz\n', fc);
+        fprintf('Achieved Cutoff:    %.2f Hz\n', achieved_freq);
+    case 'bp'
+        fprintf('Desired Center:     %d Hz\n', fc);
+        fprintf('Achieved Center:    %.2f Hz\n', achieved_freq);
+end
+
+fprintf('Percent Error:      %.2f%%\n', error_pct);
+
+% Pass/Fail based on the 5% accuracy criterion in the presentation 
+if error_pct <= 5
+    fprintf('Pass Criterion:     PASS (Goal: ±5%%)\n');
+else
+    fprintf('Pass Criterion:     FAIL (Check F_int scaling)\n');
+end

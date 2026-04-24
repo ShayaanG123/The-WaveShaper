@@ -1,80 +1,57 @@
-function out = apply_reverb(waveform, fs, room_size, mix_wet)
-    % APPLY_REVERB Algorithmic Reverb (Schroeder topology)
-    % waveform:  Input audio array (signed int32)
-    % fs:        Sample rate (e.g., 48000)
-    % room_size: Feedback multiplier for the tail (0.0 to 0.95, >0.98 will blow up!)
-    % mix_wet:   Dry/Wet mix (0.0 to 1.0)
-    
+function out = apply_reverb(waveform, AUDIO_WIDTH, ADDR_WIDTH)
     total_samples = length(waveform);
-    out = zeros(1, total_samples, 'int32');
+    out = zeros(1, total_samples, 'int32'); 
     
-    % --- 1. Hardware BRAM Allocations ---
-    % Delay lengths MUST be mutually prime to avoid metallic ringing frequencies stacking up.
-    % These specific sample lengths are tuned for 48kHz.
-    comb_sizes = [1557, 1617, 1491, 1422]; 
-    apf_sizes  = [225, 341];               
+    % Constants matching RTL
+    MAX_VAL = 2^(AUDIO_WIDTH-1) - 1;
+    MIN_VAL = -2^(AUDIO_WIDTH-1);
+    RAM_SIZE = 2^ADDR_WIDTH;
+    DELAY_SAMPLES = 811; % Prime number delay matching RTL
     
-    % Pre-allocate Circular Buffers (Represents 6 individual BRAM blocks)
-    comb_bufs = {zeros(1, comb_sizes(1)), zeros(1, comb_sizes(2)), ...
-                 zeros(1, comb_sizes(3)), zeros(1, comb_sizes(4))};
-    apf_bufs  = {zeros(1, apf_sizes(1)),  zeros(1, apf_sizes(2))};
+    % Initialize memory and pointers
+    delay_line = zeros(1, RAM_SIZE, 'int32');
+    wr_ptr = 0; 
     
-    % Pointers for the circular buffers
-    comb_ptrs = [1, 1, 1, 1];
-    apf_ptrs  = [1, 1];
-    
-    % All-Pass Feedforward/Feedback coefficient (usually fixed in hardware)
-    apf_g = 0.5; 
-    
-    % Process sample-by-sample (Hardware Clock Cycle Emulation)
+    % Latency registers to perfectly match RTL pipeline
+    x_n_reg = int32(0);
+    wet_val_reg = int32(0);
+
     for n = 1:total_samples
-        x_n = double(waveform(n));
+        % 1. Attenuate the feedback (Arithmetic Shift Right by 1)
+        % This perfectly matches the RTL: {wet_signal[31], wet_signal[31:1]}
+        % Change from -1 (0.5 gain) to a combination that yields ~0.875 gain
+        % This will significantly extend your T60 decay time
+        feedback_attenuated = bitshift(wet_val_reg, -1) + ...
+                              bitshift(wet_val_reg, -2) + ...
+                              bitshift(wet_val_reg, -3);
         
-        % --- STAGE 1: Parallel Comb Filters ---
-        comb_sum = 0;
-        for c = 1:4
-            % Read from BRAM
-            comb_read = comb_bufs{c}(comb_ptrs(c));
-            
-            % Accumulate the outputs of all 4 combs
-            comb_sum = comb_sum + comb_read;
-            
-            % Calculate feedback and write back to BRAM
-            % Hardware: write_val = x_n + (comb_read * room_size)
-            write_val = x_n + (comb_read * room_size);
-            comb_bufs{c}(comb_ptrs(c)) = write_val;
-            
-            % Advance Pointer
-            comb_ptrs(c) = comb_ptrs(c) + 1;
-            if comb_ptrs(c) > comb_sizes(c)
-                comb_ptrs(c) = 1;
-            end
+        % 2. Output previous calculation
+        mixed_val = double(x_n_reg) + double(feedback_attenuated);
+        
+        % Apply Saturation
+        if mixed_val > MAX_VAL
+            out(n) = int32(MAX_VAL);
+        elseif mixed_val < MIN_VAL
+            out(n) = int32(MIN_VAL);
+        else
+            out(n) = int32(mixed_val);
         end
         
-        % Scale down the sum to prevent bit-overflow before the next stage
-        comb_sum = comb_sum * 0.25; 
+        % 3. Update state for next cycle
+        x_n = int32(waveform(n));
         
-        % --- STAGE 2: Series All-Pass Filters ---
-        % APF 1
-        apf1_read = apf_bufs{1}(apf_ptrs(1));
-        apf1_out  = apf1_read - (comb_sum * apf_g);
-        apf_bufs{1}(apf_ptrs(1)) = comb_sum + (apf1_read * apf_g);
+        % Pointer arithmetic
+        rd_ptr = mod(wr_ptr - DELAY_SAMPLES, RAM_SIZE);
         
-        apf_ptrs(1) = apf_ptrs(1) + 1;
-        if apf_ptrs(1) > apf_sizes(1); apf_ptrs(1) = 1; end
+        % Capture RAM read and dry signal for next cycle
+        wet_val_reg = delay_line(rd_ptr + 1); 
+        x_n_reg = x_n;
         
-        % APF 2 (Takes the output of APF 1 as its input)
-        apf2_read = apf_bufs{2}(apf_ptrs(2));
-        apf2_out  = apf2_read - (apf1_out * apf_g);
-        apf_bufs{2}(apf_ptrs(2)) = apf1_out + (apf2_read * apf_g);
+        % THE REVERB WRITE: Write the SATURATED MIX back into the delay line.
+        % This creates the infinite decaying tail characteristic of reverb.
+        delay_line(wr_ptr + 1) = out(n);
         
-        apf_ptrs(2) = apf_ptrs(2) + 1;
-        if apf_ptrs(2) > apf_sizes(2); apf_ptrs(2) = 1; end
-        
-        % --- STAGE 3: Dry/Wet Mix ---
-        wet_signal = apf2_out;
-        mixed_val = ((1.0 - mix_wet) * x_n) + (mix_wet * wet_signal);
-        
-        out(n) = int32(mixed_val);
+        % Increment write pointer
+        wr_ptr = mod(wr_ptr + 1, RAM_SIZE);
     end
 end
