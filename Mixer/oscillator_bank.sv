@@ -51,15 +51,6 @@ module synth_osc_bank
         .sq_out(sq_wire)
     );
 
-    // --- 3. Sine Oscillator ---
-    osc_sine #(
-        .ACC_WIDTH(ACC_WIDTH), .OUT_WIDTH(OUT_WIDTH)
-    ) u_sine (
-        .clk(clk), .rst_n(rst_n), .enable(enable),
-        .tuning_word(tuning_word),
-        .sine_out(sine_wire)
-    );
-
     // --- 4. Triangle Oscillator ---
     osc_triangle #(
         .ACC_WIDTH(ACC_WIDTH), .OUT_WIDTH(OUT_WIDTH)
@@ -76,6 +67,9 @@ module synth_osc_bank
         .clk(clk), .rst_n(rst_n), .enable(enable),
         .noise_out(noise_wire)
     );
+	 
+	 // Ignore Sine wave right now
+	 assign sine_wire = '0;
 
     // --- 6. The DSP Mixer ---
     mixer #(

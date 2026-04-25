@@ -19,11 +19,7 @@ function out = apply_reverb(waveform, AUDIO_WIDTH, ADDR_WIDTH)
     for n = 1:total_samples
         % 1. Attenuate the feedback (Arithmetic Shift Right by 1)
         % This perfectly matches the RTL: {wet_signal[31], wet_signal[31:1]}
-        % Change from -1 (0.5 gain) to a combination that yields ~0.875 gain
-        % This will significantly extend your T60 decay time
-        feedback_attenuated = bitshift(wet_val_reg, -1) + ...
-                              bitshift(wet_val_reg, -2) + ...
-                              bitshift(wet_val_reg, -3);
+        feedback_attenuated = bitshift(wet_val_reg, -1);
         
         % 2. Output previous calculation
         mixed_val = double(x_n_reg) + double(feedback_attenuated);
