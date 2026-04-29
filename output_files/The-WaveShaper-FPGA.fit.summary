@@ -1,0 +1,20 @@
+Fitter Status : Successful - Tue Apr 28 11:50:55 2026
+Quartus Prime Version : 23.1std.1 Build 993 05/14/2024 SC Standard Edition
+Revision Name : The-WaveShaper-FPGA
+Top-level Entity Name : top
+Family : Cyclone V
+Device : 5CSXFC6D6F31C6
+Timing Models : Final
+Logic utilization (in ALMs) : 1,155 / 41,910 ( 3 % )
+Total registers : 1674
+Total pins : 287 / 499 ( 58 % )
+Total virtual pins : 0
+Total block memory bits : 6,144 / 5,662,720 ( < 1 % )
+Total RAM Blocks : 2 / 553 ( < 1 % )
+Total DSP Blocks : 30 / 112 ( 27 % )
+Total HSSI RX PCSs : 0 / 9 ( 0 % )
+Total HSSI PMA RX Deserializers : 0 / 9 ( 0 % )
+Total HSSI TX PCSs : 0 / 9 ( 0 % )
+Total HSSI PMA TX Serializers : 0 / 9 ( 0 % )
+Total PLLs : 1 / 15 ( 7 % )
+Total DLLs : 1 / 4 ( 25 % )

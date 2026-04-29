@@ -1,0 +1,377 @@
+Flow report for The-WaveShaper-FPGA
+Tue Apr 28 11:51:27 2026
+Quartus Prime Version 23.1std.1 Build 993 05/14/2024 SC Standard Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Flow Summary
+  3. Flow Settings
+  4. Flow Non-Default Global Settings
+  5. Flow Elapsed Time
+  6. Flow OS Summary
+  7. Flow Log
+  8. Flow Messages
+  9. Flow Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2024  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+
+
+
++--------------------------------------------------------------------------------------+
+; Flow Summary                                                                         ;
++---------------------------------+----------------------------------------------------+
+; Flow Status                     ; Successful - Tue Apr 28 11:51:27 2026              ;
+; Quartus Prime Version           ; 23.1std.1 Build 993 05/14/2024 SC Standard Edition ;
+; Revision Name                   ; The-WaveShaper-FPGA                                ;
+; Top-level Entity Name           ; top                                                ;
+; Family                          ; Cyclone V                                          ;
+; Device                          ; 5CSXFC6D6F31C6                                     ;
+; Timing Models                   ; Final                                              ;
+; Logic utilization (in ALMs)     ; 1,155 / 41,910 ( 3 % )                             ;
+; Total registers                 ; 1674                                               ;
+; Total pins                      ; 287 / 499 ( 58 % )                                 ;
+; Total virtual pins              ; 0                                                  ;
+; Total block memory bits         ; 6,144 / 5,662,720 ( < 1 % )                        ;
+; Total DSP Blocks                ; 30 / 112 ( 27 % )                                  ;
+; Total HSSI RX PCSs              ; 0 / 9 ( 0 % )                                      ;
+; Total HSSI PMA RX Deserializers ; 0 / 9 ( 0 % )                                      ;
+; Total HSSI TX PCSs              ; 0 / 9 ( 0 % )                                      ;
+; Total HSSI PMA TX Serializers   ; 0 / 9 ( 0 % )                                      ;
+; Total PLLs                      ; 1 / 15 ( 7 % )                                     ;
+; Total DLLs                      ; 1 / 4 ( 25 % )                                     ;
++---------------------------------+----------------------------------------------------+
+
+
++-----------------------------------------+
+; Flow Settings                           ;
++-------------------+---------------------+
+; Option            ; Setting             ;
++-------------------+---------------------+
+; Start date & time ; 04/28/2026 09:59:36 ;
+; Main task         ; Compilation         ;
+; Revision Name     ; The-WaveShaper-FPGA ;
++-------------------+---------------------+
+
+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                                                                              ;
++---------------------------------------+-------------------------------------------------------------------+---------------------+-------------------------+-----------------------------------+
+; Assignment Name                       ; Value                                                             ; Default Value       ; Entity Name             ; Section Id                        ;
++---------------------------------------+-------------------------------------------------------------------+---------------------+-------------------------+-----------------------------------+
+; COMPILER_SIGNATURE_ID                 ; 817182746746.177738477612817                                      ; --                  ; --                      ; --                                ;
+; ECO_REGENERATE_REPORT                 ; On                                                                ; Off                 ; --                      ; --                                ;
+; EDA_GENERATE_FUNCTIONAL_NETLIST       ; Off                                                               ; --                  ; --                      ; eda_board_design_timing           ;
+; EDA_GENERATE_FUNCTIONAL_NETLIST       ; Off                                                               ; --                  ; --                      ; eda_board_design_boundary_scan    ;
+; EDA_GENERATE_FUNCTIONAL_NETLIST       ; Off                                                               ; --                  ; --                      ; eda_board_design_signal_integrity ;
+; EDA_GENERATE_FUNCTIONAL_NETLIST       ; Off                                                               ; --                  ; --                      ; eda_board_design_symbol           ;
+; EDA_OUTPUT_DATA_FORMAT                ; Systemverilog Hdl                                                 ; --                  ; --                      ; eda_simulation                    ;
+; EDA_SIMULATION_TOOL                   ; Questa Intel FPGA (SystemVerilog)                                 ; <None>              ; --                      ; --                                ;
+; EDA_TIME_SCALE                        ; 1 ps                                                              ; --                  ; --                      ; eda_simulation                    ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sdram_io.pre.h                 ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/alt_types.pre.h                ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/system.pre.h                   ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer.pre.c                ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer.pre.h                ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/tclrpt.pre.c                   ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/tclrpt.pre.h                   ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer_defines.pre.h        ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer_auto_ac_init.pre.c   ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer_auto_inst_init.pre.c ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/sequencer_auto.pre.h           ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/sequencer/emif.pre.xml                   ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_ISW_FILE                          ; hps/synthesis/submodules/hps.pre.xml                              ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; HPS_PARTITION                         ; On                                                                ; --                  ; hps_hps_0_hps_io_border ; --                                ;
+; MAX_CORE_JUNCTION_TEMP                ; 85                                                                ; --                  ; --                      ; --                                ;
+; MIN_CORE_JUNCTION_TEMP                ; 0                                                                 ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; audio_sink/synthesis/../audio_sink.cmp                            ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; audio_sink/synthesis/../../audio_sink.qsys                        ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; av_config/synthesis/../av_config.cmp                              ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; av_config/synthesis/../../av_config.qsys                          ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/../hps.cmp                                          ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/hps_hps_0_hps.svd                                   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/../../hps.qsys                                      ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sdram_io.pre.h                 ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/alt_types.pre.h                ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/system.pre.h                   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer.pre.c                ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer.pre.h                ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/tclrpt.pre.c                   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/tclrpt.pre.h                   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer_defines.pre.h        ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer_auto_ac_init.pre.c   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer_auto_inst_init.pre.c ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/sequencer_auto.pre.h           ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/sequencer/emif.pre.xml                   ; --                  ; --                      ; --                                ;
+; MISC_FILE                             ; hps/synthesis/submodules/hps.pre.xml                              ; --                  ; --                      ; --                                ;
+; PARTITION_COLOR                       ; -- (Not supported for targeted family)                            ; --                  ; top                     ; hps:army                          ;
+; PARTITION_COLOR                       ; -- (Not supported for targeted family)                            ; --                  ; top                     ; top                               ;
+; PARTITION_FITTER_PRESERVATION_LEVEL   ; -- (Not supported for targeted family)                            ; --                  ; top                     ; hps:army                          ;
+; PARTITION_FITTER_PRESERVATION_LEVEL   ; -- (Not supported for targeted family)                            ; --                  ; top                     ; top                               ;
+; PARTITION_NETLIST_TYPE                ; -- (Not supported for targeted family)                            ; --                  ; top                     ; hps:army                          ;
+; PARTITION_NETLIST_TYPE                ; -- (Not supported for targeted family)                            ; --                  ; top                     ; top                               ;
+; POWER_BOARD_THERMAL_MODEL             ; None (CONSERVATIVE)                                               ; --                  ; --                      ; --                                ;
+; POWER_PRESET_COOLING_SOLUTION         ; 23 MM HEAT SINK WITH 200 LFPM AIRFLOW                             ; --                  ; --                      ; --                                ;
+; PROJECT_OUTPUT_DIRECTORY              ; output_files                                                      ; --                  ; --                      ; --                                ;
+; SLD_FILE                              ; audio_sink/synthesis/audio_sink.debuginfo                         ; --                  ; --                      ; --                                ;
+; SLD_FILE                              ; av_config/synthesis/av_config.debuginfo                           ; --                  ; --                      ; --                                ;
+; SLD_FILE                              ; hps/synthesis/hps.regmap                                          ; --                  ; --                      ; --                                ;
+; SLD_FILE                              ; hps/synthesis/hps.debuginfo                                       ; --                  ; --                      ; --                                ;
+; SLD_INFO                              ; QSYS_NAME audio_sink HAS_SOPCINFO 1 GENERATION_ID 1776403488      ; --                  ; audio_sink              ; --                                ;
+; SLD_INFO                              ; QSYS_NAME av_config HAS_SOPCINFO 1 GENERATION_ID 1776400656       ; --                  ; av_config               ; --                                ;
+; SLD_INFO                              ; QSYS_NAME hps HAS_SOPCINFO 1 GENERATION_ID 1777320426             ; --                  ; hps                     ; --                                ;
+; SOPCINFO_FILE                         ; audio_sink/synthesis/../../audio_sink.sopcinfo                    ; --                  ; --                      ; --                                ;
+; SOPCINFO_FILE                         ; av_config/synthesis/../../av_config.sopcinfo                      ; --                  ; --                      ; --                                ;
+; SOPCINFO_FILE                         ; hps/synthesis/../../hps.sopcinfo                                  ; --                  ; --                      ; --                                ;
+; SYNTHESIS_ONLY_QIP                    ; On                                                                ; --                  ; --                      ; --                                ;
+; SYNTHESIS_ONLY_QIP                    ; On                                                                ; --                  ; --                      ; --                                ;
+; SYNTHESIS_ONLY_QIP                    ; On                                                                ; --                  ; --                      ; --                                ;
+; TOP_LEVEL_ENTITY                      ; top                                                               ; The-WaveShaper-FPGA ; --                      ; --                                ;
+; USE_DLL_FREQUENCY_FOR_DQS_DELAY_CHAIN ; On                                                                ; Off                 ; --                      ; --                                ;
++---------------------------------------+-------------------------------------------------------------------+---------------------+-------------------------+-----------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------+
+; Flow Elapsed Time                                                                                                          ;
++------------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Module Name            ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
++------------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Analysis & Synthesis   ; 00:00:05     ; 1.0                     ; 465 MB              ; 00:00:14                           ;
+; Analysis & Elaboration ; 00:00:09     ; 1.0                     ; 983 MB              ; 00:00:16                           ;
+; Analysis & Synthesis   ; 00:00:12     ; 1.0                     ; 772 MB              ; 00:00:20                           ;
+; Partition Merge        ; 00:00:02     ; 1.0                     ; 754 MB              ; 00:00:02                           ;
+; Fitter                 ; 00:00:50     ; 1.4                     ; 3265 MB             ; 00:02:58                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 640 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.7                     ; 1491 MB             ; 00:00:29                           ;
+; EDA Netlist Writer     ; 00:00:02     ; 1.0                     ; 929 MB              ; 00:00:02                           ;
+; Analysis & Elaboration ; 00:00:06     ; 1.0                     ; 849 MB              ; 00:00:15                           ;
+; Analysis & Synthesis   ; 00:00:07     ; 1.0                     ; 524 MB              ; 00:00:16                           ;
+; Analysis & Elaboration ; 00:00:10     ; 1.0                     ; 1006 MB             ; 00:00:18                           ;
+; Analysis & Synthesis   ; 00:00:14     ; 1.0                     ; 822 MB              ; 00:00:22                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 774 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:52     ; 1.4                     ; 3326 MB             ; 00:03:04                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 632 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.7                     ; 1492 MB             ; 00:00:29                           ;
+; EDA Netlist Writer     ; 00:00:03     ; 1.0                     ; 929 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:14     ; 1.0                     ; 860 MB              ; 00:00:23                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 774 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:52     ; 1.4                     ; 3288 MB             ; 00:03:00                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 632 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.7                     ; 1499 MB             ; 00:00:29                           ;
+; EDA Netlist Writer     ; 00:00:03     ; 1.0                     ; 929 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:12     ; 1.0                     ; 847 MB              ; 00:00:21                           ;
+; Partition Merge        ; 00:00:04     ; 1.0                     ; 925 MB              ; 00:00:04                           ;
+; Fitter                 ; 00:00:52     ; 1.4                     ; 3431 MB             ; 00:03:01                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 632 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.7                     ; 1519 MB             ; 00:00:29                           ;
+; EDA Netlist Writer     ; 00:00:03     ; 1.0                     ; 929 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:15     ; 1.8                     ; 769 MB              ; 00:00:31                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 766 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:40     ; 1.1                     ; 3274 MB             ; 00:01:59                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 602 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:18     ; 1.2                     ; 1435 MB             ; 00:00:18                           ;
+; EDA Netlist Writer     ; 00:00:02     ; 1.0                     ; 872 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:11     ; 1.0                     ; 822 MB              ; 00:00:19                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 884 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:39     ; 1.1                     ; 3352 MB             ; 00:01:32                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 602 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:18     ; 1.2                     ; 1462 MB             ; 00:00:18                           ;
+; EDA Netlist Writer     ; 00:00:02     ; 1.0                     ; 872 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:10     ; 1.0                     ; 813 MB              ; 00:00:19                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 887 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:39     ; 1.1                     ; 3366 MB             ; 00:01:32                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 605 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:18     ; 1.2                     ; 1462 MB             ; 00:00:18                           ;
+; EDA Netlist Writer     ; 00:00:02     ; 1.0                     ; 879 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:13     ; 1.0                     ; 835 MB              ; 00:00:22                           ;
+; Partition Merge        ; 00:00:04     ; 1.0                     ; 765 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:53     ; 1.4                     ; 3284 MB             ; 00:03:08                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 643 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:20     ; 1.7                     ; 1493 MB             ; 00:00:30                           ;
+; EDA Netlist Writer     ; 00:00:03     ; 1.0                     ; 929 MB              ; 00:00:02                           ;
+; Analysis & Synthesis   ; 00:00:12     ; 1.0                     ; 821 MB              ; 00:00:21                           ;
+; Partition Merge        ; 00:00:03     ; 1.0                     ; 933 MB              ; 00:00:04                           ;
+; Fitter                 ; 00:00:51     ; 1.4                     ; 3318 MB             ; 00:02:51                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 644 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.7                     ; 1518 MB             ; 00:00:30                           ;
+; EDA Netlist Writer     ; 00:00:03     ; 1.0                     ; 917 MB              ; 00:00:02                           ;
+; Analysis & Elaboration ; 00:00:07     ; 1.0                     ; 849 MB              ; 00:00:15                           ;
+; Analysis & Elaboration ; 00:00:10     ; 1.0                     ; 1026 MB             ; 00:00:18                           ;
+; Analysis & Synthesis   ; 00:00:14     ; 1.0                     ; 855 MB              ; 00:00:22                           ;
+; Partition Merge        ; 00:00:04     ; 1.0                     ; 767 MB              ; 00:00:03                           ;
+; Fitter                 ; 00:00:47     ; 1.3                     ; 3277 MB             ; 00:02:33                           ;
+; Assembler              ; 00:00:05     ; 1.0                     ; 604 MB              ; 00:00:05                           ;
+; Timing Analyzer        ; 00:00:19     ; 1.5                     ; 1492 MB             ; 00:00:24                           ;
+; EDA Netlist Writer     ; 00:00:02     ; 1.0                     ; 905 MB              ; 00:00:02                           ;
+; Total                  ; 00:15:51     ; --                      ; --                  ; 00:37:05                           ;
++------------------------+--------------+-------------------------+---------------------+------------------------------------+
+
+
++-----------------------------------------------------------------------------------------------+
+; Flow OS Summary                                                                               ;
++------------------------+------------------------------+---------+------------+----------------+
+; Module Name            ; Machine Hostname             ; OS Name ; OS Version ; Processor type ;
++------------------------+------------------------------+---------+------------+----------------+
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Elaboration ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Elaboration ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Elaboration ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Elaboration ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Elaboration ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Analysis & Synthesis   ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Partition Merge        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter                 ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler              ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer        ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
+; EDA Netlist Writer     ; hh-1305-10.lan.local.cmu.edu ; Red Hat ; Red Hat    ; x86_64         ;
++------------------------+------------------------------+---------+------------+----------------+
+
+
+------------
+; Flow Log ;
+------------
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --analysis_and_elaboration
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --analysis_and_elaboration
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --analysis_and_elaboration
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --analysis_and_elaboration
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --analysis_and_elaboration
+quartus_map --read_settings_files=on --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_cdb --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA --merge=on
+quartus_fit --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_asm --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_sta The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+quartus_eda --read_settings_files=off --write_settings_files=off The-WaveShaper-FPGA -c The-WaveShaper-FPGA
+
+
+

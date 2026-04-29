@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags=""
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element audio_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element audio_pll_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element clock_bridge_0
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element st_splitter_0
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5CSXFC6D6F31C6" />
+ <parameter name="deviceFamily" value="Cyclone V" />
+ <parameter name="deviceSpeedGrade" value="6_H6" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName">The-WaveShaper-FPGA.qpf</parameter>
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface
+   name="aud_clk"
+   internal="audio_pll_0.audio_clk"
+   type="clock"
+   dir="start" />
+ <interface
+   name="audio"
+   internal="st_splitter_0.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface name="reset" internal="audio_pll_0.ref_reset" type="reset" dir="end" />
+ <interface
+   name="sys_clk"
+   internal="clock_bridge_0.in_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="wolfson"
+   internal="audio_0.external_interface"
+   type="conduit"
+   dir="end" />
+ <module
+   name="audio_0"
+   kind="altera_up_avalon_audio"
+   version="18.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
+  <parameter name="audio_in" value="false" />
+  <parameter name="audio_out" value="true" />
+  <parameter name="avalon_bus_type" value="Streaming" />
+  <parameter name="dw" value="24" />
+ </module>
+ <module
+   name="audio_pll_0"
+   kind="altera_up_avalon_audio_pll"
+   version="18.0"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="5CSXFC6D6F31C6" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="6_H6" />
+  <parameter name="audio_clk_freq" value="12.288" />
+  <parameter name="device_family" value="Cyclone V" />
+  <parameter name="gui_refclk" value="50.0" />
+ </module>
+ <module
+   name="clock_bridge_0"
+   kind="altera_clock_bridge"
+   version="23.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="0" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="st_splitter_0"
+   kind="altera_avalon_st_splitter"
+   version="23.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="24" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="2" />
+  <parameter name="QUALIFY_VALID_OUT" value="1" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <connection
+   kind="avalon_streaming"
+   version="23.1"
+   start="st_splitter_0.out0"
+   end="audio_0.avalon_left_channel_sink" />
+ <connection
+   kind="avalon_streaming"
+   version="23.1"
+   start="st_splitter_0.out1"
+   end="audio_0.avalon_right_channel_sink" />
+ <connection
+   kind="clock"
+   version="23.1"
+   start="clock_bridge_0.out_clk"
+   end="st_splitter_0.clk" />
+ <connection
+   kind="clock"
+   version="23.1"
+   start="clock_bridge_0.out_clk"
+   end="audio_0.clk" />
+ <connection
+   kind="clock"
+   version="23.1"
+   start="clock_bridge_0.out_clk"
+   end="audio_pll_0.ref_clk" />
+ <connection
+   kind="reset"
+   version="23.1"
+   start="audio_pll_0.reset_source"
+   end="audio_0.reset" />
+ <connection
+   kind="reset"
+   version="23.1"
+   start="audio_pll_0.reset_source"
+   end="st_splitter_0.reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

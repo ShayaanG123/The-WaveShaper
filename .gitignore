@@ -11,6 +11,17 @@ Quartus_Projects/
 *.log
 *.key
 
+# Quartus auto-generated
+.qsys_edit
+db/
+incremental_db/
+audio_sink/
+av_config/
+hps/
+hps_isw_handoff/
+The-WaveShaper-FPGA.archive.rpt
+hps_sdram_p0_summary.csv
+
 # Backup files
 *.bak
 

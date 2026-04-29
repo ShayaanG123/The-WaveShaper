@@ -1,0 +1,17 @@
+Partition Merge Status : Successful - Tue Apr 28 11:50:08 2026
+Quartus Prime Version : 23.1std.1 Build 993 05/14/2024 SC Standard Edition
+Revision Name : The-WaveShaper-FPGA
+Top-level Entity Name : top
+Family : Cyclone V
+Logic utilization (in ALMs) : N/A
+Total registers : 1862
+Total pins : 287
+Total virtual pins : 0
+Total block memory bits : 6,144
+Total DSP Blocks : 30
+Total HSSI RX PCSs : 0
+Total HSSI PMA RX Deserializers : 0
+Total HSSI TX PCSs : 0
+Total HSSI PMA TX Serializers : 0
+Total PLLs : 1
+Total DLLs : 1

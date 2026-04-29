@@ -1,0 +1,28 @@
+<sld_project_info>
+  <project>
+    <hash md5_digest_80b="9d1f1c526076fa93b625"/>
+  </project>
+  <file_info>
+    <file device="5CSXFC6D6F31C6" path="The-WaveShaper-FPGA.sof" usercode="0xFFFFFFFF"/>
+  </file_info>
+  <sld_infos>
+    <sld_info hpath="audio_sink:sink" name="sink">
+      <assignment_values>
+        <assignment_value text="QSYS_NAME audio_sink HAS_SOPCINFO 1 GENERATION_ID 1776403488"/>
+      </assignment_values>
+      <parameters/>
+    </sld_info>
+    <sld_info hpath="av_config:wolfson_config" name="wolfson_config">
+      <assignment_values>
+        <assignment_value text="QSYS_NAME av_config HAS_SOPCINFO 1 GENERATION_ID 1776400656"/>
+      </assignment_values>
+      <parameters/>
+    </sld_info>
+    <sld_info hpath="hps:army" name="army">
+      <assignment_values>
+        <assignment_value text="QSYS_NAME hps HAS_SOPCINFO 1 GENERATION_ID 1777389943"/>
+      </assignment_values>
+      <parameters/>
+    </sld_info>
+  </sld_infos>
+</sld_project_info>
